@@ -47,10 +47,8 @@ test('Try to add Menu Item as admin', async () => {
         .send({ title, description: 'Description with a lotta things', image: 'pizza9.png', price: 0.0001 });
     expect(addMenuItemRes.status).toBe(200);
 
-    // verify the menu contains the new item
     expect(addMenuItemRes.body).toEqual(expect.arrayContaining([expect.objectContaining({ title })]));
 
-    // cleanup: remove the created menu item so tests stay idempotent
     const created = addMenuItemRes.body.find((m) => m.title === title);
     if (created) {
       const conn = await DB.getConnection();
@@ -58,3 +56,18 @@ test('Try to add Menu Item as admin', async () => {
       conn.end();
     }
 });
+
+test('Create order', async () => {
+    const orderRes = await request(app)
+        .post('/api/order')
+        .set('Authorization', `Bearer ${testUserAuthToken}`)
+        .send({ franchiseId: 1, storeId: 1, items: [{ menuId: 1, description: 'TestingNewPizza', price: 0.05 }] });
+    expect(orderRes.status).toBe(200);
+    expect(orderRes.body).toMatchObject({
+        order: {
+            franchiseId: 1,
+            storeId: 1,
+            items: [{ menuId: 1, description: 'TestingNewPizza', price: 0.05 }],
+        },
+    });
+})
