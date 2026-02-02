@@ -23,4 +23,10 @@ test('login', async () => {
 test('failed login', async () => {
   const loginRes = await request(app).put('/api/auth').send({ email: testUser.email, password: 'wrong' });
   expect(loginRes.status).toBe(404);
-})
+});
+
+test('Register user', async () => {
+  const newUser = { name: 'new user', email: Math.random().toString(36).substring(2, 12) + '@test.com', password: 'a' };
+  const registerRes = await request(app).post('/api/auth').send(newUser);
+  expect(registerRes.status).toBe(200);
+});
