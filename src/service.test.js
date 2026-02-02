@@ -43,3 +43,5 @@ test('Update a current user', async () => {
   expect(updateRes.status).toBe(200); 
   expect(updateRes.body.user).toMatchObject({ id: userId, name: UpdatedUser.name, email: UpdatedUser.email });
 })
+
+// Going to try to commit again because the last one didnt work for some reason
