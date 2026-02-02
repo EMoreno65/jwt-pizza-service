@@ -19,3 +19,8 @@ test('login', async () => {
   delete user.password;
   expect(loginRes.body.user).toMatchObject(user);
 });
+
+test('failed login', async () => {
+  const loginRes = await request(app).put('/api/auth').send({ email: testUser.email, password: 'wrong' });
+  expect(loginRes.status).toBe(404);
+})
