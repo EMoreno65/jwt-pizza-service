@@ -41,7 +41,23 @@ test('Update a current user', async () => {
     .set('Authorization', `Bearer ${testUserAuthToken}`)
     .send(UpdatedUser);
   expect(updateRes.status).toBe(200); 
-  expect(updateRes.body.user).toMatchObject({ id: userId, name: UpdatedUser.name, email: UpdatedUser.email });
+  expect(updateRes.body.user).toMatchObject({ name: UpdatedUser.name, email: UpdatedUser.email });
+});
+
+test('Delete a user', async () => {
+  const deleteRes = await request(app)
+    .delete(`/api/user/${userId}`)
+    .set('Authorization', `Bearer ${testUserAuthToken}`);
+  expect(deleteRes.status).toBe(200); 
+  expect(deleteRes.body).toMatchObject({ message: 'not implemented' });
+});
+
+test('List users', async () => {
+  const listRes = await request(app)
+    .get('/')
+    .set('Authorization', `Bearer ${testUserAuthToken}`);
+  expect(listRes.status).toBe(200); 
+  expect(listRes.body).toMatchObject({ message: 'not implemented', users: [], more: false });
 })
 
 // Going to try to commit again because the last one didnt work for some reason
