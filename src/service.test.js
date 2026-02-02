@@ -30,3 +30,10 @@ test('Register user', async () => {
   const registerRes = await request(app).post('/api/auth').send(newUser);
   expect(registerRes.status).toBe(200);
 });
+
+test('Update a current user', async () => {
+  const UpdatedUser = { name: 'Updated User', email: 'somethingElse@test.com', password: 'b' };
+  const UpdateRes = ((await request(app).put('/api/auth/:userId')).send(UpdatedUser));
+  expect(UpdateRes.status).toBe(200); 
+  expect(UpdateRes.body.user).toMatchObject(UpdatedUser);
+})
