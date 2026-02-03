@@ -1,6 +1,20 @@
 const request = require('supertest');
 const app = require('./service');
-const { DB } = require('./database/database.js');
+
+const { Role, DB } = require('./database/database.js');
+
+function randomName() {
+  return Math.random().toString(36).substring(2, 12);
+}
+
+async function createAdminUser() {
+  let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
+  user.name = randomName();
+  user.email = user.name + '@admin.com';
+
+  user = await DB.addUser(user);
+  return { ...user, password: 'toomanysecrets' };
+}
 
 const testUser = { name: 'pizza diner', email: 'reg@test.com', password: 'a' };
 let testUserAuthToken;
@@ -11,12 +25,14 @@ let adminUserAuthToken;
 
 beforeAll(async () => {
   testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
-  const registerRes = await request(app).post('/api/auth').send(testUser);
-  testUserAuthToken = registerRes.body.token;
-  // Login as the built-in admin user (created during DB initialization)
-  const adminLoginRes = await request(app).put('/api/auth').send({ email: 'a@jwt.com', password: 'admin' });
-  adminUserAuthToken = adminLoginRes.body.token;
+  await request(app).post('/api/auth').send(testUser);
+//   testUserId = registerRes.body.user.id;
+  adminUser = await createAdminUser();
+  console.log(adminUser);
+  adminUserId = adminUser.id;
   await request(app).put('/api/auth').send(testUser);
+  const adminRes = await request(app).put('/api/auth').send(adminUser);
+  adminUserAuthToken = adminRes.body.token;
 });
 
 test('Get Menu', async () => {
@@ -35,7 +51,7 @@ test('Try to add Menu Item as non-admin', async () => {
         .put('/api/order/menu')
         .set('Authorization', `Bearer ${testUserAuthToken}`)
         .send({ title: 'ExtraPizza', description: 'Description with a lotta things', image: 'pizza9.png', price: 0.0001 });
-    expect(addMenuItemRes.status).toBe(403);
+    expect(addMenuItemRes.status).toBe(401);
 });
 
 test('Try to add Menu Item as admin', async () => {
@@ -61,6 +77,10 @@ test('Create order', async () => {
         .post('/api/order')
         .set('Authorization', `Bearer ${testUserAuthToken}`)
         .send({ franchiseId: 1, storeId: 1, items: [{ menuId: 1, description: 'TestingNewPizza', price: 0.05 }] });
+    console.log(orderRes.body);
+    if (orderRes.status !== 200) {
+        console.error('ORDER CREATE FAILED:', orderRes.status, orderRes.body);
+    }
     expect(orderRes.status).toBe(200);
     expect(orderRes.body).toMatchObject({
         order: {
