@@ -36,7 +36,6 @@ test('Try to add Menu Item as non-admin', async () => {
         .set('Authorization', `Bearer ${testUserAuthToken}`)
         .send({ title: 'ExtraPizza', description: 'Description with a lotta things', image: 'pizza9.png', price: 0.0001 });
     expect(addMenuItemRes.status).toBe(403);
-    console.log(addMenuItemRes.body);
 });
 
 test('Try to add Menu Item as admin', async () => {
