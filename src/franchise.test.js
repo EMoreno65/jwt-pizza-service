@@ -39,10 +39,16 @@ beforeAll(async () => {
 });
 
 test('Get all franchises', async () => {
+    const newName = 'newPizza_' + Math.random().toString(36).substring(2, 8);
+    const nameAddedRes = await request(app)
+      .post('/api/franchise')
+      .set('Authorization', `Bearer ${adminUserAuthToken}`)
+      .send({ name: newName, admins: [{ email: adminUser.email }] });
+    expect(nameAddedRes.status).toBe(200);
     const res = await request(app).get('/api/franchise');
     expect(res.status).toBe(200);
     expect(res.body.franchises).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: 1, name: 'pizzaPocket'})
+      expect.objectContaining({ name: newName })
     ]));
 });
 
