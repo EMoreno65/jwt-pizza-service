@@ -24,17 +24,18 @@ let adminUserAuthToken;
 // let testUserId;
 let adminUserId;
 let createdFranchiseId;
+let adminUser;
 
 beforeAll(async () => {
   testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
   await request(app).post('/api/auth').send(testUser);
 //   testUserId = registerRes.body.user.id;
-  const adminUser = await createAdminUser();
+  adminUser = await createAdminUser();
   console.log(adminUser);
   adminUserId = adminUser.id;
   await request(app).put('/api/auth').send(testUser);
-  await request(app).put('/api/auth').send(adminUser);
-  adminUserAuthToken = adminUser.token;
+  const adminRes = await request(app).put('/api/auth').send(adminUser);
+  adminUserAuthToken = adminRes.body.token;
 });
 
 test('Get all franchises', async () => {
@@ -50,11 +51,11 @@ test('User creates franchise', async () => {
     const franchiseRes = await request(app)
       .post('/api/franchise')
       .set('Authorization', `Bearer ${adminUserAuthToken}`)
-      .send({ name, admins: [{ email: 'a@jwt.com'}]});
-    console.log(franchiseRes.body);
-    if (franchiseRes.status !== 200) {
-      console.error('FRANCHISE CREATE FAILED:', franchiseRes.status, franchiseRes.body);
-    }
+      .send({ name, admins: [{ email: adminUser.email }] });
+    // console.log(franchiseRes.body);
+    // if (franchiseRes.status !== 200) {
+    //   console.error('FRANCHISE CREATE FAILED:', franchiseRes.status, franchiseRes.body);
+    // }
     expect(franchiseRes.status).toBe(200);
     createdFranchiseId = franchiseRes.body.id;
 });
@@ -64,16 +65,15 @@ test('Get user franchises', async () => {
     await request(app)
       .post('/api/franchise')
       .set('Authorization', `Bearer ${adminUserAuthToken}`)
-      .send({ name: listName, admins: [{ email: 'a@jwt.com'}]});
+      .send({ name: listName, admins: [{ email: adminUser.email}]});
     const userFranchisesRes = await request(app)
       .get(`/api/franchise/${adminUserId}`)
       .set('Authorization', `Bearer ${adminUserAuthToken}`);
-
     expect(userFranchisesRes.status).toBe(200);
     expect(userFranchisesRes.body).toEqual(expect.arrayContaining([
       expect.objectContaining({
         name: listName,
-        admins: expect.arrayContaining([expect.objectContaining({ email: 'a@jwt.com' })])
+        admins: expect.arrayContaining([expect.objectContaining({ email: adminUser.email })])
       })
     ]));
 });
