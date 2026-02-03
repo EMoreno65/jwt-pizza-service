@@ -1,3 +1,19 @@
+const { Role, DB } = require('./database/database.js');
+const request = require('supertest');
+const app = require('./service');
+
+async function createAdminUser() {
+  let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
+  user.name = randomName();
+  user.email = user.name + '@admin.com';
+
+  user = await DB.addUser(user);
+  return { ...user, password: 'toomanysecrets' };
+};
+
+function randomName() {
+  return Math.random().toString(36).substring(2, 12);
+};
 
 
 jest.mock('./database/database.js', () => ({
@@ -6,6 +22,7 @@ jest.mock('./database/database.js', () => ({
     Diner: 'diner',
   },
   DB: {
+    addUser: jest.fn(),
     getMenu: jest.fn(),
     addMenuItem: jest.fn(),
     createFranchise: jest.fn(),
@@ -14,7 +31,7 @@ jest.mock('./database/database.js', () => ({
   },
 }));
 
-let mockUser = null;
+let mockUser;
 jest.mock('./routes/authRouter.js', () => {
   const authRouter = (req, res, next) => next();
   authRouter.authenticateToken = (req, res, next) => {
@@ -32,14 +49,14 @@ jest.mock('./routes/authRouter.js', () => {
   };
 });
 
-const request = require('supertest');
-const app = require('./service');
-const { DB, Role } = require('./database/database.js');
-
-beforeEach(() => {
-  mockUser = null;
+beforeEach(async () => {
   jest.clearAllMocks();
   global.fetch = undefined;
+  DB.addUser.mockImplementation(async (user) => ({
+    id: 1,
+    ...user,
+  }));
+  mockUser = await createAdminUser();
 });
 
 afterEach(() => {
