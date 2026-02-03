@@ -2,8 +2,22 @@ const request = require('supertest');
 const app = require('./service');
 // const { DB } = require('./database/database.js');
 
+const { Role, DB } = require('./database/database.js');
+
+function randomName() {
+  return Math.random().toString(36).substring(2, 12);
+}
+
+async function createAdminUser() {
+  let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
+  user.name = randomName();
+  user.email = user.name + '@admin.com';
+
+  user = await DB.addUser(user);
+  return { ...user, password: 'toomanysecrets' };
+}
+
 const testUser = { name: 'pizza diner', email: 'reg@test.com', password: 'a' };
-const adminUser = { name: '常用名字', email: 'a@jwt.com', password: 'admin' };
 // let testUserAuthToken;
 
 let adminUserAuthToken;
@@ -15,12 +29,12 @@ beforeAll(async () => {
   testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
   await request(app).post('/api/auth').send(testUser);
 //   testUserId = registerRes.body.user.id;
-  const adminLoginRes = await request(app).post('/api/auth').send(adminUser);
-  console.log(adminLoginRes.body);
-  adminUserId = adminLoginRes.body.user.id;
+  const adminUser = await createAdminUser();
+  console.log(adminUser);
+  adminUserId = adminUser.id;
   await request(app).put('/api/auth').send(testUser);
   await request(app).put('/api/auth').send(adminUser);
-  adminUserAuthToken = adminLoginRes.body.token;
+  adminUserAuthToken = adminUser.token;
 });
 
 test('Get all franchises', async () => {
@@ -43,7 +57,7 @@ test('User creates franchise', async () => {
     }
     expect(franchiseRes.status).toBe(200);
     createdFranchiseId = franchiseRes.body.id;
-})
+});
 
 test('Get user franchises', async () => {
     const listName = 'TestFranchise_' + Math.random().toString(36).substring(2, 8);
