@@ -3,6 +3,7 @@ const app = require('./service');
 // const { DB } = require('./database/database.js');
 
 const testUser = { name: 'pizza diner', email: 'reg@test.com', password: 'a' };
+const adminUser = { name: '常用名字', email: 'a@jwt.com', password: 'admin' };
 // let testUserAuthToken;
 
 let adminUserAuthToken;
@@ -14,10 +15,11 @@ beforeAll(async () => {
   testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
   await request(app).post('/api/auth').send(testUser);
 //   testUserId = registerRes.body.user.id;
-  const adminLoginRes = await request(app).put('/api/auth').send({ email: 'a@jwt.com', password: 'admin' });
+  const adminLoginRes = await request(app).post('/api/auth').send(adminUser);
   console.log(adminLoginRes.body);
   adminUserId = adminLoginRes.body.user.id;
   await request(app).put('/api/auth').send(testUser);
+  await request(app).put('/api/auth').send(adminUser);
   adminUserAuthToken = adminLoginRes.body.token;
 });
 
