@@ -104,19 +104,33 @@ test('Add menu item as admin', async () => {
     expect(addRes.body).toEqual(expect.arrayContaining([expect.objectContaining({ title: 'Extra' })]));
 })
 
+test('Create Order', async () => {
+    DB.addDinerOrder.mockResolvedValue({ id: 1, dinerId: 2, storeId: 3, items: [ { title: 'Pepperoni', quantity: 2 } ], total: 0.0084 });
 
+    mockUser = { id: 2, roles: [{ role: Role.Diner }] };
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ reportUrl: 'u', jwt: 'j' }) });
 
-
-
-
-
-
-
-
-
-
-
-
+    const orderRes = await request(app)
+      .post('/api/order')
+      .set('Authorization', 'Bearer diner')
+      .send({ storeId: 3, items: [ { menuItemId: 1, quantity: 2 } ] }); 
+    if (orderRes.status !== 200) {
+      console.log(orderRes.body);
+    }
+    expect(orderRes.status).toBe(200);
+    expect(orderRes.body).toEqual(
+      expect.objectContaining({
+        order: expect.objectContaining({
+          dinerId: 2,
+          storeId: 3,
+          items: expect.arrayContaining([expect.objectContaining({ title: 'Pepperoni', quantity: 2 })]),
+          total: 0.0084,
+        }),
+        jwt: 'j',
+        followLinkToEndChaos: 'u',
+      })
+    );
+});
 
 
 
