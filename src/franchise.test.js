@@ -34,6 +34,7 @@ test('User creates franchise', async () => {
       .post('/api/franchise')
       .set('Authorization', `Bearer ${adminUserAuthToken}`)
       .send({ name, admins: [{ email: 'a@jwt.com'}]});
+    console.log(franchiseRes.body);
     if (franchiseRes.status !== 200) {
       console.error('FRANCHISE CREATE FAILED:', franchiseRes.status, franchiseRes.body);
     }
