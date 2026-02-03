@@ -28,9 +28,8 @@ beforeAll(async () => {
   const testUserRes = await request(app).post('/api/auth').send(testUser);
   testUserAuthToken = testUserRes.body.token;
 //   testUserId = registerRes.body.user.id;
-  adminUser = await createAdminUser();
+  const adminUser = await createAdminUser();
   console.log(adminUser);
-  adminUserId = adminUser.id;
   await request(app).put('/api/auth').send(testUser);
   const adminRes = await request(app).put('/api/auth').send(adminUser);
   adminUserAuthToken = adminRes.body.token;
