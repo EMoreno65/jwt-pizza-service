@@ -63,6 +63,34 @@ test('Get Menu', async () => {
   );
 });
 
+test('Add item as non admin', async () => {
+    mockUser = { id: 2, roles: [{ role: Role.Diner }] };
+    const res = await request(app)
+      .put('/api/order/menu')
+      .set('Authorization', 'Bearer fake')
+      .send({ title: 'Nope', description: 'nope', image: 'x.png', price: 0.01 });   
+    expect(res.status).toBe(403);
+});
+
+test('Add menu item as admin', async () => {
+    mockUser = { id: 1, roles: [{ role: Role.Admin }] };
+    const newItem = { title: 'Extra', description: 'good', image: 'pizza9.png', price: 0.0001 };
+    DB.addMenuItem.mockResolvedValue({ ...newItem, id: 34});
+    DB.getMenu.mockResolvedValue([{ ...newItem, id: 34 }]);
+
+    const addRes = await request(app)
+      .put('/api/order/menu')
+      .set('Authorization', 'Bearer admin')
+      .send(newItem);
+
+    expect(addRes.status).toBe(200);
+    expect(addRes.body).toEqual(expect.arrayContaining([expect.objectContaining({ title: 'Extra' })]));
+})
+
+
+
+
+
 
 
 
