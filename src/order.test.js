@@ -25,7 +25,8 @@ let adminUserAuthToken;
 
 beforeAll(async () => {
   testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
-  await request(app).post('/api/auth').send(testUser);
+  const testUserRes = await request(app).post('/api/auth').send(testUser);
+  testUserAuthToken = testUserRes.body.token;
 //   testUserId = registerRes.body.user.id;
   adminUser = await createAdminUser();
   console.log(adminUser);
@@ -51,7 +52,7 @@ test('Try to add Menu Item as non-admin', async () => {
         .put('/api/order/menu')
         .set('Authorization', `Bearer ${testUserAuthToken}`)
         .send({ title: 'ExtraPizza', description: 'Description with a lotta things', image: 'pizza9.png', price: 0.0001 });
-    expect(addMenuItemRes.status).toBe(401);
+    expect(addMenuItemRes.status).toBe(403);
 });
 
 test('Try to add Menu Item as admin', async () => {
