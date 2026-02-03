@@ -15,6 +15,7 @@ beforeAll(async () => {
   await request(app).post('/api/auth').send(testUser);
 //   testUserId = registerRes.body.user.id;
   const adminLoginRes = await request(app).put('/api/auth').send({ email: 'a@jwt.com', password: 'admin' });
+  console.log(adminLoginRes.body);
   adminUserId = adminLoginRes.body.user.id;
   await request(app).put('/api/auth').send(testUser);
   adminUserAuthToken = adminLoginRes.body.token;
