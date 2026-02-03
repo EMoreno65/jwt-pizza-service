@@ -32,6 +32,37 @@ jest.mock('./routes/authRouter.js', () => {
   };
 });
 
+const request = require('supertest');
+const app = require('./service');
+const { DB, Role } = require('./database/database.js');
+
+beforeEach(() => {
+  mockUser = null;
+  jest.clearAllMocks();
+  global.fetch = undefined;
+});
+
+afterEach(() => {
+  global.fetch = undefined;
+});
+
+test('Get Menu', async () => {
+  DB.getMenu.mockResolvedValue([
+    { title: 'Pepperoni', image: 'pizza2.png', price: 0.0042, description: 'Good Pizza' },
+    { title: 'Margarita', image: 'pizza3.png', price: 0.0042, description: 'Better Pizza' },
+  ]);
+
+  const res = await request(app).get('/api/order/menu');
+
+  expect(res.status).toBe(200);
+  expect(res.body).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'Pepperoni' }),
+      expect.objectContaining({ title: 'Margarita' }),
+    ])
+  );
+});
+
 
 
 
