@@ -118,6 +118,33 @@ test('Get user franchises', async () => {
     );
 });
 
+test('Create store in franchise', async () => {
+    mockUser = { id: 1, roles: [{ role: Role.Admin }] };
+    const franchiseId = 1;
+    const storeName = 'Store_' + Math.random().toString(36).substring(2, 8);;
+    const createdStore = { id: 1, name: storeName, totalRevenue: 0 };
+
+    DB.getFranchise.mockResolvedValue({ id: franchiseId, name: 'Pizza Palace', admins: [{ id: mockUser.id, name: mockUser.name, email: mockUser.email }], stores: [] });
+
+    DB.createStore.mockResolvedValue(createdStore);
+    const storeRes = await request(app)
+      .post(`/api/franchise/${franchiseId}/store`)
+      .set ('Authorization', `Bearer admin`)
+      .send({ franchiseId, name: storeName });
+    expect(storeRes.status).toBe(200);
+    expect(storeRes.body).toMatchObject({ name: storeName, totalRevenue: 0 });
+});
+
+test('Delete a franchise', async () => {
+    const franchiseId = 1;
+    DB.deleteFranchise.mockResolvedValue({ message: 'franchise deleted' });
+    const deleteRes = await request(app)
+      .delete(`/api/franchise/${franchiseId}`)
+      .set('Authorization', `Bearer admin`);
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body).toMatchObject({ message: 'franchise deleted' });
+});
+
 
 
 
