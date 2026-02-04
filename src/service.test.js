@@ -32,6 +32,9 @@ jest.mock('./database/database.js', () => ({
     createStore: jest.fn(),
     addDinerOrder: jest.fn(),
     deleteStore: jest.fn(),
+    getUser: jest.fn(),
+    loginUser: jest.fn(),
+    isLoggedIn: jest.fn(),
   },
 }));
 
@@ -49,6 +52,14 @@ beforeEach(async () => {
     ...user,
   }));
   mockUser = await createAdminUser();
+  DB.getUser.mockImplementation(async (email, password) => {
+    if (email === mockUser.email && password === mockUser.password) {
+      return { id: mockUser.id, name: mockUser.name, email: mockUser.email, roles: [{ role: Role.Admin }] };
+    }
+    return null;
+  });
+  DB.loginUser.mockResolvedValue();
+  DB.isLoggedIn.mockResolvedValue(true);
 });
 
 afterEach(() => {
