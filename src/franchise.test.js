@@ -1,4 +1,3 @@
-const { Role, DB } = require('./database/database.js');
 const request = require('supertest');
 const app = require('./service');
 
@@ -28,6 +27,7 @@ jest.mock('./database/database.js', () => ({
     createFranchise: jest.fn(),
     deleteFranchise: jest.fn(),
     getFranchise: jest.fn(),
+    getFranchises: jest.fn(),
     getUserFranchises: jest.fn(),
     createStore: jest.fn(),
     addDinerOrder: jest.fn(),
@@ -52,6 +52,8 @@ jest.mock('./routes/authRouter.js', () => {
   };
 });
 
+const { Role, DB } = require('./database/database.js');
+
 beforeEach(async () => {
   jest.clearAllMocks();
   global.fetch = undefined;
@@ -64,6 +66,56 @@ beforeEach(async () => {
 
 afterEach(() => {
   global.fetch = undefined;
+});
+
+test('Get all franchises', async () => {
+    const testNameOne = 'Franchise_' + Math.random().toString(36).substring(2, 8);
+    const testNameTwo = 'Franchise_' + Math.random().toString(36).substring(2, 8);
+    const franchises = [
+    { id: 1, name: testNameOne, admins: [{ id: 1, name: mockUser.name, email: mockUser.email }] },
+    { id: 2, name: testNameTwo, admins: [{ id: 2, name: 'Other Admin', email: 'otheradmin@test.com' }] },
+    ];
+    DB.getFranchises.mockResolvedValue([franchises, true]);
+
+    const res = await request(app).get('/api/franchise');
+
+    expect(res.status).toBe(200);
+    expect(res.body.franchises).toEqual(
+    expect.arrayContaining([expect.objectContaining({ name: testNameOne }), expect.objectContaining({ name: testNameTwo })])
+    );
+});
+
+test('User creates franchise', async () => {
+    const name = 'TestFranchise_' + Math.random().toString(36).substring(2, 8);;
+    const createdFranchise = { id: 1, name, admins: [{ id: mockUser.id, name: mockUser.name, email: mockUser.email }] };
+    DB.createFranchise.mockResolvedValue(createdFranchise);
+
+    const addRes = await request(app)
+      .post('/api/franchise')
+      .set('Authorization', `Bearer admin`)
+      .send({ name, admins: [{ email: mockUser.email }] });
+    expect(addRes.status).toBe(200);
+    expect(addRes.body).toMatchObject({ name, admins: expect.arrayContaining([expect.objectContaining({ email: mockUser.email })]) });
+});
+
+test('Get user franchises', async () => {
+    const listName = 'TestFranchise_' + Math.random().toString(36).substring(2, 8);;
+    const userFranchises = [
+      { id: 1, name: listName, admins: [{ id: mockUser.id, name: mockUser.name, email: mockUser.email }] },
+    ];
+    DB.getUserFranchises.mockResolvedValue(userFranchises);
+    const userFranchisesRes = await request(app)
+      .get(`/api/franchise/${mockUser.id}`)
+      .set('Authorization', `Bearer admin`);    
+    expect(userFranchisesRes.status).toBe(200);
+    expect(userFranchisesRes.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: listName,
+          admins: expect.arrayContaining([expect.objectContaining({ email: mockUser.email })])
+        })
+      ])
+    );
 });
 
 
