@@ -68,7 +68,6 @@ beforeEach(async () => {
   });
 
   DB.isLoggedIn.mockResolvedValue(true);
-  DB.loginUser.mockResolvedValue();
 });
 
 afterEach(() => {
@@ -87,4 +86,14 @@ test('login', async () => {
 test('failed login', async () => {
   const loginRes = await request(app).put('/api/auth').send({ email: mockUser.email, password: 'wrong' });
   expect(loginRes.status).toBe(500);
+});
+
+test('register a user', async () => {
+  const newUser = { name: 'New User_' + Math.random(), email: 'newuser@example.com', password: 'password123' };
+  const registerRes = await request(app).post('/api/auth').send(newUser);
+  if (registerRes.status !== 200) {
+    console.error(registerRes.body);
+  }
+  expect(registerRes.status).toBe(200);
+  expect(registerRes.body.user.email).toBe(newUser.email);
 });
