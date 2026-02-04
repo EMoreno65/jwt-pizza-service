@@ -31,6 +31,7 @@ jest.mock('./database/database.js', () => ({
     getUserFranchises: jest.fn(),
     createStore: jest.fn(),
     addDinerOrder: jest.fn(),
+    deleteStore: jest.fn(),
   },
 }));
 
@@ -145,10 +146,18 @@ test('Delete a franchise', async () => {
     expect(deleteRes.body).toMatchObject({ message: 'franchise deleted' });
 });
 
-
-
-
-
+test('Delete a store from franchise', async () => {
+    const franchiseId = 1;
+    const storeId = 1;
+    DB.getFranchise.mockResolvedValue({ id: franchiseId, name: 'Pizza Palace', admins: [{ id: mockUser.id, name: mockUser.name, email: mockUser.email }], stores: [] });
+    DB.createStore.mockResolvedValue({ id: storeId, name: 'StoreToDelete', totalRevenue: 0 });
+    DB.deleteStore.mockResolvedValue({ message: 'store deleted' });
+    const deleteRes = await request(app)
+      .delete(`/api/franchise/${franchiseId}/store/${storeId}`)
+      .set('Authorization', `Bearer admin`);
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body).toMatchObject({ message: 'store deleted' });
+});
 
 
 
