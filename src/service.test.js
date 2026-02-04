@@ -58,8 +58,16 @@ beforeEach(async () => {
     }
     return null;
   });
-  DB.loginUser.mockResolvedValue();
+
+  DB.loginUser.mockImplementation(async (email, password) => {
+    if (email === mockUser.email && password === mockUser.password) {
+      return { id: mockUser.id, name: mockUser.name, email: mockUser.email, roles: [{ role: Role.Admin }] };
+    }
+    return null;
+  });
+
   DB.isLoggedIn.mockResolvedValue(true);
+  DB.loginUser.mockResolvedValue();
 });
 
 afterEach(() => {
@@ -73,6 +81,11 @@ test('login', async () => {
   const user = { ...mockUser, roles: [{ role: 'admin' }] };
   delete user.password;
   expect(loginRes.body.user).toMatchObject(user);
+});
+
+test('failed login', async () => {
+  const loginRes = await request(app).put('/api/auth').send({ email: mockUser.email, password: 'wrong' });
+  expect(loginRes.status).toBe(500);
 });
 
 
