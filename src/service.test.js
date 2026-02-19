@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('./service');
+const app = require('./service.js');
 
 async function createAdminUser() {
   let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
@@ -25,6 +25,7 @@ jest.mock('./database/database.js', () => ({
     addUser: jest.fn(),
     getMenu: jest.fn(),
     addMenuItem: jest.fn(),
+    listUsers: jest.fn(),
     createFranchise: jest.fn(),
     deleteFranchise: jest.fn(),
     getFranchise: jest.fn(),
@@ -104,11 +105,22 @@ test('list users unauthorized', async () => {
 });
 
 test('list users', async () => {
+  jest.unmock('./database/database.js');
   const [user, userToken] = await registerUser(request(app));
+  const [user2, userToken2] = await registerUser(request(app));
+  const actual = jest.requireActual('./database/database.js');
+  DB.listUsers.mockImplementation(actual.DB.listUsers.bind(actual.DB));
   const listUsersRes = await request(app)
     .get('/api/user')
     .set('Authorization', 'Bearer ' + userToken);
+  console.log(listUsersRes.body);
   expect(listUsersRes.status).toBe(200);
+  expect(listUsersRes.body.users).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ email: user.email }),
+      expect.objectContaining({ email: user2.email }),
+    ])
+  );
 });
 
 async function registerUser(service) {

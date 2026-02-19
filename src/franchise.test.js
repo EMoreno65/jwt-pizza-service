@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('./service');
+const app = require('./service.js');
 
 async function createAdminUser() {
   let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
