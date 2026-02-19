@@ -105,22 +105,19 @@ test('list users unauthorized', async () => {
 });
 
 test('list users', async () => {
-  jest.unmock('./database/database.js');
-  const [user, userToken] = await registerUser(request(app));
-  const [user2, userToken2] = await registerUser(request(app));
-  const actual = jest.requireActual('./database/database.js');
-  DB.listUsers.mockImplementation(actual.DB.listUsers.bind(actual.DB));
-  const listUsersRes = await request(app)
-    .get('/api/user')
-    .set('Authorization', 'Bearer ' + userToken);
-  console.log(listUsersRes.body);
-  expect(listUsersRes.status).toBe(200);
-  expect(listUsersRes.body.users).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ email: user.email }),
-      expect.objectContaining({ email: user2.email }),
-    ])
-  );
+  const fakeUsers = [
+    { id: 101, name: 'U1', email: 'u1@test', roles: [{ role: Role.Admin }] },
+    { id: 102, name: 'U2', email: 'u2@test', roles: [{ role: Role.Diner }] },
+  ];
+  DB.listUsers.mockResolvedValue(fakeUsers);
+  const [_, userToken] = await registerUser(request(app));
+  const res = await request(app).get('/api/user').set('Authorization', 'Bearer ' + userToken);
+  expect(res.status).toBe(200);
+  expect(res.body.users).toEqual(expect.arrayContaining([
+    expect.objectContaining({ email: 'u1@test' }),
+    expect.objectContaining({ email: 'u2@test' }),
+  ]));
+  expect(DB.listUsers).toHaveBeenCalled();
 });
 
 async function registerUser(service) {
