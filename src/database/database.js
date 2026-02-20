@@ -60,7 +60,7 @@ class DB {
     const connection = await this.getConnection();
     try {
       const users = await this.query(connection, `SELECT * FROM user`);
-      console.log("The users found in the database are: ", users);
+      // console.log("The users found in the database are: ", users);
       return users;
     } finally {
       connection.end();

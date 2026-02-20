@@ -91,7 +91,9 @@ userRouter.delete(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     console.log('Delete user endpoint hit, calls database next');
-    const userId = Number(req.params.userId);
+    const userId = req.params.userId;
+    // console.log('The request is ', req.params);
+    console.log('User id to delete is ', userId);
     const user = req.user;
     if (user.id !== userId && !user.isRole(Role.Admin)) {
       return res.status(403).json({ message: 'unauthorized' });
@@ -107,7 +109,7 @@ userRouter.get(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     const users = await DB.listUsers();
-    console.log("Users are: ", users);
+    // console.log("Users are: ", users);
     res.json({ users });
   })
 );
