@@ -24,6 +24,23 @@ userRouter.docs = [
     },
   },
   {
+    method: 'DELETE',
+    path: '/api/user/:userId',
+    requiresAuth: true,
+    description: 'Admin can remove a user',
+    example: `curl -X DELETE localhost:3000/api/user/1 -H 'Authorization: Bearer tttttt'`,
+    response: {
+      users: [
+        {
+          id: 1,
+          name: '常用名字',
+          email: 'a@jwt.com',
+          roles: [{ role: 'admin' }],
+        },
+      ],
+    },
+  },
+  {
     method: 'GET',
     path: '/api/user/me',
     requiresAuth: true,
@@ -73,7 +90,14 @@ userRouter.delete(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({ message: 'not implemented' });
+    console.log('Delete user endpoint hit, calls database next');
+    const userId = Number(req.params.userId);
+    const user = req.user;
+    if (user.id !== userId && !user.isRole(Role.Admin)) {
+      return res.status(403).json({ message: 'unauthorized' });
+    }
+    const deletedUser = await DB.deleteUser(userId);
+    res.status(200).json({ user: deletedUser });
   })
 );
 

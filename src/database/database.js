@@ -215,6 +215,17 @@ class DB {
     }
   }
 
+  async deleteUser(userId) {
+    console.log('It is in the database', userId);
+    const connection = await this.getConnection();
+    try {
+      await this.query(connection, `DELETE FROM userRole WHERE userId=?`, [userId]);
+      await this.query(connection, `DELETE FROM user WHERE id=?`, [userId]);
+    } finally {
+      connection.end();
+    }
+  };
+
   async getFranchises(authUser, page = 0, limit = 10, nameFilter = '*') {
     const connection = await this.getConnection();
 

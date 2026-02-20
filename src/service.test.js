@@ -37,6 +37,7 @@ jest.mock('./database/database.js', () => ({
     getUser: jest.fn(),
     loginUser: jest.fn(),
     isLoggedIn: jest.fn(),
+    deleteUser: jest.fn(),
   },
 }));
 
@@ -118,6 +119,19 @@ test('list users', async () => {
     expect.objectContaining({ email: 'u2@test' }),
   ]));
   expect(DB.listUsers).toHaveBeenCalled();
+});
+
+test('delete user', async () => {
+  const fakeUsers = [
+    { id: 101, name: 'U1', email: 'u1@test', roles: [{ role: Role.Admin }] },
+    { id: 102, name: 'U2', email: 'u2@test', roles: [{ role: Role.Diner }] },  
+  ];
+  DB.deleteUser.mockResolvedValue(fakeUsers[0]);
+  const [user, token] = await registerUser(request(app));
+  const deleteRes = await request(app).delete(`/api/user/${user.id}`).set('Authorization', 'Bearer ' + token);
+  console.log(deleteRes.body.user);
+  expect(deleteRes.status).toBe(200);
+  expect(deleteRes.body.user).toMatchObject(fakeUsers[0]);
 });
 
 async function registerUser(service) {
