@@ -95,6 +95,8 @@ userRouter.delete(
     // console.log('The request is ', req.params);
     console.log('User id to delete is ', userId);
     const user = req.user;
+    console.log('Compared against: ', user.id);
+    console.log('User role is ', user.roles);
     if (user.id !== userId && !user.isRole(Role.Admin)) {
       return res.status(403).json({ message: 'unauthorized' });
     }

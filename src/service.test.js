@@ -127,9 +127,12 @@ test('delete user', async () => {
     { id: 102, name: 'U2', email: 'u2@test', roles: [{ role: Role.Diner }] },  
   ];
   DB.deleteUser.mockResolvedValue(fakeUsers[0]);
-  const [user, token] = await registerUser(request(app));
-  const deleteRes = await request(app).delete(`/api/user/${user.id}`).set('Authorization', 'Bearer ' + token);
-  console.log(deleteRes.body.user);
+  const loginRes = await request(app).put('/api/auth').send(mockUser);
+  expect(loginRes.status).toBe(200);
+  expect(loginRes.body.token).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
+  const user = { ...mockUser, roles: [{ role: 'admin' }] };
+  const deleteRes = await request(app).delete(`/api/user/${user.id}`).set('Authorization', 'Bearer ' + loginRes.body.token);
+  console.log('Delete res is ', deleteRes.body);
   expect(deleteRes.status).toBe(200);
   expect(deleteRes.body.user).toMatchObject(fakeUsers[0]);
 });
