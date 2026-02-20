@@ -112,6 +112,7 @@ test('list users', async () => {
   ];
   DB.listUsers.mockResolvedValue(fakeUsers);
   const [_, userToken] = await registerUser(request(app));
+  console.log(_);
   const res = await request(app).get('/api/user').set('Authorization', 'Bearer ' + userToken);
   expect(res.status).toBe(200);
   expect(res.body.users).toEqual(expect.arrayContaining([
