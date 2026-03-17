@@ -1,3 +1,4 @@
+
 const os = require('os');
 const config = require('./config.js');
 
@@ -26,9 +27,6 @@ function requestTracker(req, res, next) {
 
   next();
 }
-
-// Testing for deployment after doing automation, moved config file
-
 
 function pizzaPurchase(success, latency, price) {
   purchaseMetrics.total++;
@@ -65,92 +63,93 @@ async function sendMetrics() {
     return;
   }
 
-  const metrics = [
-    {
-      name: 'jwt_pizza_http_request_count',
-      unit: '1',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asInt: httpMetrics.count, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_http_error_count',
-      unit: '1',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asInt: httpMetrics.errors, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_http_total_latency_ms',
-      unit: 'ms',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asInt: httpMetrics.totalLatency, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_purchase_total',
-      unit: '1',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asInt: purchaseMetrics.total, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_purchase_success',
-      unit: '1',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asInt: purchaseMetrics.success, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_purchase_failure',
-      unit: '1',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asInt: purchaseMetrics.failure, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_purchase_revenue',
-      unit: '1',
-      sum: {
-        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
-        isMonotonic: true,
-        dataPoints: [{ asDouble: purchaseMetrics.revenue, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_system_cpu_percent',
-      unit: '%',
-      gauge: {
-        dataPoints: [{ asDouble: systemMetrics.cpu, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-    {
-      name: 'jwt_pizza_system_memory_percent',
-      unit: '%',
-      gauge: {
-        dataPoints: [{ asDouble: systemMetrics.memory, timeUnixNano: Date.now() * 1000000, attributes: [{ key: 'source', value: { stringValue: source } }] }],
-      },
-    },
-  ];
+  const nowNs = Date.now() * 1000000;
+  const attr = [{ key: 'source', value: { stringValue: source } }];
 
   const payload = {
     resourceMetrics: [
       {
         scopeMetrics: [
           {
-            metrics,
+            metrics: [
+              {
+                name: 'jwt_pizza_http_request_count',
+                unit: '1',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asInt: httpMetrics.count, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_http_error_count',
+                unit: '1',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asInt: httpMetrics.errors, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_http_total_latency_ms',
+                unit: 'ms',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asInt: httpMetrics.totalLatency, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_purchase_total',
+                unit: '1',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asInt: purchaseMetrics.total, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_purchase_success',
+                unit: '1',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asInt: purchaseMetrics.success, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_purchase_failure',
+                unit: '1',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asInt: purchaseMetrics.failure, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_purchase_revenue',
+                unit: '1',
+                sum: {
+                  aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                  isMonotonic: true,
+                  dataPoints: [{ asDouble: purchaseMetrics.revenue, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_system_cpu_percent',
+                unit: '%',
+                gauge: {
+                  dataPoints: [{ asDouble: systemMetrics.cpu, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+              {
+                name: 'jwt_pizza_system_memory_percent',
+                unit: '%',
+                gauge: {
+                  dataPoints: [{ asDouble: systemMetrics.memory, timeUnixNano: nowNs, attributes: attr }],
+                },
+              },
+            ],
           },
         ],
       },
@@ -187,4 +186,3 @@ module.exports = {
   requestTracker,
   pizzaPurchase,
 };
-
