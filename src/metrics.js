@@ -76,7 +76,7 @@ async function sendMetrics() {
   const nowNs = Date.now() * 1000000;
   const metrics = [ 
     {
-      name: 'http_requests_total',
+      name: 'ethan_http_requests_total',
       unit: '1',
       sum: {
         aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
@@ -91,7 +91,7 @@ async function sendMetrics() {
       }
     },
     {
-      name: 'pizzas_ordered',
+      name: 'ethan_pizzas_ordered',
       unit: '1',
       sum: {
         aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
