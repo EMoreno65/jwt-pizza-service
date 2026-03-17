@@ -89,6 +89,21 @@ async function sendMetrics() {
           },
         ]
       }
+    },
+    {
+      name: 'pizzas_ordered',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: purchaseMetrics.total,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
     }
   ]
 
@@ -104,6 +119,7 @@ async function sendMetrics() {
     ],
   };
 
+  console.log("Sending payload:", JSON.stringify(payload, null, 2));
   try {
     const response = await fetch(endpointUrl, {
       method: 'POST',
