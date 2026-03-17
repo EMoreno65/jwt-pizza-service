@@ -1,6 +1,7 @@
 
 const os = require('os');
 const config = require('./config.js');
+let totalPizzas = 0;
 
 const httpMetrics = { 
   TOTAL: { count: 0, totalLatency: 0, errors: 0 },
@@ -73,6 +74,8 @@ async function sendMetrics() {
     return;
   }
 
+  totalPizzas += Math.floor(Math.random() * 3);
+
   const nowNs = Date.now() * 1000000;
   const metrics = [ 
     {
@@ -98,7 +101,7 @@ async function sendMetrics() {
         isMonotonic: true,
         dataPoints: [
           {
-            asInt: purchaseMetrics.total,
+            asInt: totalPizzas,
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
