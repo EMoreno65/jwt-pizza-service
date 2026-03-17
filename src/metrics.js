@@ -26,7 +26,7 @@ function requestTracker(req, res, next) {
   next();
 }
 
-// Testing for deployment after doing automation
+// Testing for deployment after doing automation, moved config file
 
 
 function pizzaPurchase(success, latency, price) {
