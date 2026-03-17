@@ -94,6 +94,66 @@ async function sendMetrics() {
       }
     },
     {
+        name: 'ethan_http_get_requests_total',
+        unit: '1',
+        sum: {
+          aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+          isMonotonic: true,
+          dataPoints: [
+            {
+              asInt: httpMetrics.GET.count,
+              timeUnixNano: nowNs,
+              attributes: [{ key: 'source', value: { stringValue: source } }],
+            },
+          ]
+        }
+      },
+        {
+        name: 'ethan_http_put_requests_total',
+        unit: '1',
+        sum: {
+          aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+          isMonotonic: true,
+          dataPoints: [
+            {
+              asInt: httpMetrics.PUT.count,
+              timeUnixNano: nowNs,
+              attributes: [{ key: 'source', value: { stringValue: source } }],
+            },
+          ]
+        }
+      },
+          {
+        name: 'ethan_http_delete_requests_total',
+        unit: '1',
+        sum: {
+          aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+          isMonotonic: true,
+          dataPoints: [
+            {
+              asInt: httpMetrics.DELETE.count,
+              timeUnixNano: nowNs,
+              attributes: [{ key: 'source', value: { stringValue: source } }],
+            },
+          ]
+        }
+      },
+          {
+        name: 'ethan_http_post_requests_total',
+        unit: '1',
+        sum: {
+          aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+          isMonotonic: true,
+          dataPoints: [
+            {
+              asInt: httpMetrics.POST.count,
+              timeUnixNano: nowNs,
+              attributes: [{ key: 'source', value: { stringValue: source } }],
+            },
+          ]
+        }
+      },
+    {
       name: 'ethan_pizzas_ordered',
       unit: '1',
       sum: {
