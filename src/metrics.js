@@ -26,6 +26,8 @@ function requestTracker(req, res, next) {
   next();
 }
 
+// Testing for deployment after doing automation
+
 
 function pizzaPurchase(success, latency, price) {
   purchaseMetrics.total++;
