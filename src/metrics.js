@@ -1,3 +1,4 @@
+
 const os = require('os');
 const config = require('./config.js');
 
@@ -26,9 +27,6 @@ function requestTracker(req, res, next) {
 
   next();
 }
-
-// Testing for deployment after doing automation, moved config file
-
 
 function pizzaPurchase(success, latency, price) {
   purchaseMetrics.total++;
@@ -65,6 +63,37 @@ async function sendMetrics() {
     return;
   }
 
+  const payload = {
+    resourceMetrics: [
+      {
+        scopeMetrics: [
+          {
+            metrics,
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(endpointUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accountId}:${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      console.error(`Failed to push metrics data to Grafana: ${body}`);
+    }
+  } catch (err) {
+    console.error('Failed to send metrics:', err.message);
+  }
+}
+
 if (process.env.NODE_ENV !== 'test') {
   setInterval(() => {
     collectSystemMetrics();
@@ -77,4 +106,3 @@ module.exports = {
   requestTracker,
   pizzaPurchase,
 };
-
