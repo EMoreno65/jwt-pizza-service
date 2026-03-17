@@ -94,6 +94,7 @@ orderRouter.post(
       metrics.pizzaPurchase(true, latency, 5);
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
+      metrics.pizzaPurchase(false, latency, 6);
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
   })
