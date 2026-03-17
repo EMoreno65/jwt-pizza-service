@@ -1,0 +1,1 @@
+app.use(metrics.requestTracker);
