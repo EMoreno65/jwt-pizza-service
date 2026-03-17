@@ -2,7 +2,13 @@
 const os = require('os');
 const config = require('./config.js');
 
-const httpMetrics = { count: 0, errors: 0, totalLatency: 0 };
+const httpMetrics = { 
+  TOTAL: { count: 0, totalLatency: 0, errors: 0 },
+  GET: { count: 0, totalLatency: 0, errors: 0 },
+  PUT: { count: 0, totalLatency: 0, errors: 0 },
+  POST: { count: 0, totalLatency: 0, errors: 0 },
+  DELETE: { count: 0, totalLatency: 0, errors: 0 },
+ };
 const systemMetrics = { cpu: 0, memory: 0 };
 const purchaseMetrics = { total: 0, success: 0, failure: 0, revenue: 0 };
 
@@ -17,11 +23,15 @@ function requestTracker(req, res, next) {
 
     const duration = Date.now() - start;
 
-    httpMetrics.count++;
-    httpMetrics.totalLatency += duration;
+    httpMetrics[req.method].count++;
+    httpMetrics.TOTAL.count++;
+    httpMetrics[req.method].totalLatency += duration;
+    httpMetrics.TOTAL.totalLatency += duration;
+
 
     if (res.statusCode >= 400) {
-      httpMetrics.errors++;
+      httpMetrics[req.method].errors++;
+      httpMetrics.TOTAL.errors++;
     }
   });
 
@@ -63,6 +73,25 @@ async function sendMetrics() {
     return;
   }
 
+  const nowNs = Date.now() * 1000000;
+  const metrics = [ 
+    {
+      name: 'http_requests_total',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: httpMetrics.TOTAL.count,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    }
+  ]
+
   const payload = {
     resourceMetrics: [
       {
@@ -99,7 +128,6 @@ if (process.env.NODE_ENV !== 'test') {
     collectSystemMetrics();
     sendMetrics();
   }, 5000);
-}
 }
 
 module.exports = {
