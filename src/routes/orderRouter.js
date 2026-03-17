@@ -81,6 +81,7 @@ orderRouter.post(
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
     const start = Date.now();
+    console.log("Route hit - starting order");
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
@@ -90,7 +91,7 @@ orderRouter.post(
     const j = await r.json();
     if (r.ok) {
       console.log("It's in here, here's the order and json ", order, r);
-      // metrics.pizzaPurchase(true, latency, )
+      metrics.pizzaPurchase(true, latency, 5);
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
