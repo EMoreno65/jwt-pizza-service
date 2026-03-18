@@ -52,6 +52,16 @@ function requestTracker(req, res, next) {
   next();
 }
 
+function authAttempt(success) {
+  authMetrics.total++;
+  if (success) {
+    authMetrics.success++;
+  }
+  else {
+    authMetrics.failure++;
+  }
+}
+
 function pizzaPurchase(success, latency, price) {
   purchaseMetrics.total++;
 
@@ -207,6 +217,21 @@ async function sendMetrics() {
         ],
       },
     },
+    {
+      name: 'ethan_auth_attempts_min',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: authMetrics.total,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    }
   ]
 
   const payload = {
@@ -251,4 +276,5 @@ if (process.env.NODE_ENV !== 'test') {
 module.exports = {
   requestTracker,
   pizzaPurchase,
+  authAttempt
 };
