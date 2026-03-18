@@ -1,6 +1,7 @@
 
 const os = require('os');
 const config = require('./config.js');
+const { memo } = require('react');
 
 const httpMetrics = { 
   TOTAL: { count: 0, totalLatency: 0, errors: 0 },
@@ -76,12 +77,13 @@ function pizzaPurchase(success, latency, price) {
 
 function collectSystemMetrics() {
   const cpuUsage = os.loadavg()[0] / os.cpus().length;
-  systemMetrics.cpu = cpuUsage * 100;
+  systemMetrics.cpu = cpuUsage.toFixed(2) * 100;
 
   const totalMemory = os.totalmem();
   const freeMemory = os.freemem();
   const usedMemory = totalMemory - freeMemory;
-  systemMetrics.memory = (usedMemory / totalMemory) * 100;
+  let memory = (usedMemory / totalMemory) * 100;
+  systemMetrics.memory = memory.toFixed(2);
 }
 
 function getActiveUsersCount() {
