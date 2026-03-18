@@ -231,7 +231,20 @@ async function sendMetrics() {
           },
         ]
       }
-    }
+    },
+    {
+      name: 'ethan_cpu_and_memory',
+      unit: '1',
+      gauge: {
+        dataPoints: [
+          {
+            asDouble: systemMetrics.cpu,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ],
+      },
+    },
   ]
 
   const payload = {
