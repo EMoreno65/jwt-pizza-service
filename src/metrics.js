@@ -136,7 +136,7 @@ async function sendMetrics() {
       gauge: {
         dataPoints: [
           {
-            asDouble: httpMetrics.TOTAL.count > 0 ? httpMetrics.TOTAL.totalLatency / httpMetrics.TOTAL.count : 0,
+            asDouble: httpMetrics.TOTAL.totalLatency,
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
@@ -249,6 +249,19 @@ async function sendMetrics() {
       }
     },
     {
+      name: 'ethan_pizza_latency',
+      unit: '1',
+      gauge: {
+        dataPoints: [
+          {
+            asDouble: purchaseMetrics.latency,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ],
+      },
+    },
+    {
       name: 'ethan_active_users_10m',
       unit: '1',
       gauge: {
@@ -307,12 +320,25 @@ async function sendMetrics() {
       }
     },
     {
-      name: 'ethan_cpu_and_memory',
+      name: 'ethan_cpu_usage',
       unit: '1',
       gauge: {
         dataPoints: [
           {
             asDouble: systemMetrics.cpu,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ],
+      },
+    },
+    {
+      name: 'ethan_memory_usage',
+      unit: '1',
+      gauge: {
+        dataPoints: [
+          {
+            asDouble: systemMetrics.memory,
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
