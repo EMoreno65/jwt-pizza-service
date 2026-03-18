@@ -10,7 +10,7 @@ const httpMetrics = {
   DELETE: { count: 0, totalLatency: 0, errors: 0 },
  };
 const systemMetrics = { cpu: 0, memory: 0 };
-const purchaseMetrics = { total: 0, success: 0, failure: 0, revenue: 0 };
+const purchaseMetrics = { total: 0, success: 0, failure: 0, revenue: 0, latency: 0 };
 const userMetrics = { total: 0, active: 0 };
 const authMetrics = { total: 0, success: 0, failure: 0 };
 const ACTIVE_WINDOW_MS = 10 * 60 * 1000;
@@ -71,6 +71,7 @@ function pizzaPurchase(success, latency, price) {
   } else {
     purchaseMetrics.failure++;
   }
+  purchaseMetrics.latency += latency;
 }
 
 function collectSystemMetrics() {
@@ -128,6 +129,19 @@ async function sendMetrics() {
           },
         ]
       }
+    },
+    {
+      name: 'ethan_http_request_latency',
+      unit: '1',
+      gauge: {
+        dataPoints: [
+          {
+            asDouble: httpMetrics.TOTAL.count > 0 ? httpMetrics.TOTAL.totalLatency / httpMetrics.TOTAL.count : 0,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ],
+      },
     },
     {
         name: 'ethan_http_get_requests_total',
@@ -198,6 +212,36 @@ async function sendMetrics() {
         dataPoints: [
           {
             asInt: purchaseMetrics.total,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    },
+    {
+      name: 'ethan_failed_orders',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: purchaseMetrics.failure,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    },
+    {
+      name: 'ethan_revenue',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asDouble: purchaseMetrics.revenue,
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
