@@ -277,6 +277,36 @@ async function sendMetrics() {
       }
     },
     {
+      name: 'ethan_auth_successes_min',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: authMetrics.success,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    },
+    {
+      name: 'ethan_auth_failures_min',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: authMetrics.failure,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    },
+    {
       name: 'ethan_cpu_and_memory',
       unit: '1',
       gauge: {
