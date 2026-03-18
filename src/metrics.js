@@ -1,7 +1,6 @@
 
 const os = require('os');
 const config = require('./config.js');
-let totalPizzas = 0;
 
 const httpMetrics = { 
   TOTAL: { count: 0, totalLatency: 0, errors: 0 },
@@ -12,10 +11,17 @@ const httpMetrics = {
  };
 const systemMetrics = { cpu: 0, memory: 0 };
 const purchaseMetrics = { total: 0, success: 0, failure: 0, revenue: 0 };
+const userMetrics = { total: 0, active: 0 };
+const authMetrics = { total: 0, success: 0, failure: 0 };
+const ACTIVE_WINDOW_MS = 10 * 60 * 1000;
+const activeUsersLastSeen = new Map();
+const knownUsers = new Set();
 
 function requestTracker(req, res, next) {
   const isInternalMetricsPost = req.method === 'POST' && req.path === '/metrics';
   const start = Date.now();
+  const requestMethod = httpMetrics[req.method] ? req.method : 'TOTAL';
+  const userKey = req.user?.id ? `user:${req.user.id}` : null;
 
   res.on('finish', () => {
     if (isInternalMetricsPost) {
@@ -24,14 +30,21 @@ function requestTracker(req, res, next) {
 
     const duration = Date.now() - start;
 
-    httpMetrics[req.method].count++;
+    httpMetrics[requestMethod].count++;
     httpMetrics.TOTAL.count++;
-    httpMetrics[req.method].totalLatency += duration;
+    httpMetrics[requestMethod].totalLatency += duration;
     httpMetrics.TOTAL.totalLatency += duration;
 
+    if (userKey) {
+      activeUsersLastSeen.set(userKey, Date.now());
+      if (!knownUsers.has(userKey)) {
+        knownUsers.add(userKey);
+        userMetrics.total = knownUsers.size;
+      }
+    }
 
     if (res.statusCode >= 400) {
-      httpMetrics[req.method].errors++;
+      httpMetrics[requestMethod].errors++;
       httpMetrics.TOTAL.errors++;
     }
   });
@@ -60,6 +73,19 @@ function collectSystemMetrics() {
   systemMetrics.memory = (usedMemory / totalMemory) * 100;
 }
 
+function getActiveUsersCount() {
+  const now = Date.now();
+
+  for (const [userKey, lastSeen] of activeUsersLastSeen.entries()) {
+    if (now - lastSeen > ACTIVE_WINDOW_MS) {
+      activeUsersLastSeen.delete(userKey);
+    }
+  }
+
+  userMetrics.active = activeUsersLastSeen.size;
+  return userMetrics.active;
+}
+
 async function sendMetrics() {
   if (typeof fetch !== 'function') {
     return;
@@ -74,7 +100,7 @@ async function sendMetrics() {
     return;
   }
 
-  totalPizzas += Math.floor(Math.random() * 3);
+  const activeUsersCount = getActiveUsersCount();
 
   const nowNs = Date.now() * 1000000;
   const metrics = [ 
@@ -161,13 +187,26 @@ async function sendMetrics() {
         isMonotonic: true,
         dataPoints: [
           {
-            asInt: totalPizzas,
+            asInt: purchaseMetrics.total,
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
         ]
       }
-    }
+    },
+    {
+      name: 'ethan_active_users_10m',
+      unit: '1',
+      gauge: {
+        dataPoints: [
+          {
+            asInt: activeUsersCount,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ],
+      },
+    },
   ]
 
   const payload = {
