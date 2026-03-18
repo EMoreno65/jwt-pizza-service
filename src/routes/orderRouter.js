@@ -91,10 +91,10 @@ orderRouter.post(
     const j = await r.json();
     if (r.ok) {
       console.log("It's in here, here's the order and json ", order, r);
-      metrics.pizzaPurchase(true, latency, 5);
+      metrics.pizzaPurchase(true, latency, order.items.reduce((sum, item) => sum + item.price, 0));
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
-      metrics.pizzaPurchase(false, latency, 6);
+      metrics.pizzaPurchase(false, latency, 0);
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
   })
