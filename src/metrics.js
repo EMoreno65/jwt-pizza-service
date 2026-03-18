@@ -1,7 +1,6 @@
 
 const os = require('os');
 const config = require('./config.js');
-const { memo } = require('react');
 
 const httpMetrics = { 
   TOTAL: { count: 0, totalLatency: 0, errors: 0 },
