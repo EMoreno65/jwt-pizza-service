@@ -58,6 +58,9 @@ class Logger {
   }
 
 sendLogToGrafana(event) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
     console.log("Sending log to Grafana:", JSON.stringify(event, null, 2));
     const body = JSON.stringify(event);
     fetch(`${config.logging.endpointUrl}`, {
@@ -72,4 +75,7 @@ sendLogToGrafana(event) {
     });
     }
 }
-module.exports = new Logger();
+module.exports = {
+  logger: new Logger(),
+  httpLogger: new Logger().httpLogger,
+}
