@@ -1,19 +1,19 @@
-// const { Role, DB } = require('./database/database.js');
-// const request = require('supertest');
-// const app = require('./service.js');
+const { Role, DB } = require('./database/database.js');
+const request = require('supertest');
+const app = require('./service.js');
 
-// async function createAdminUser() {
-//   let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
-//   user.name = randomName();
-//   user.email = user.name + '@admin.com';
+async function createAdminUser() {
+  let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
+  user.name = randomName();
+  user.email = user.name + '@admin.com';
 
-//   user = await DB.addUser(user);
-//   return { ...user, password: 'toomanysecrets' };
-// };
+  user = await DB.addUser(user);
+  return { ...user, password: 'toomanysecrets' };
+};
 
-// function randomName() {
-//   return Math.random().toString(36).substring(2, 12);
-// };
+function randomName() {
+  return Math.random().toString(36).substring(2, 12);
+};
 
 
 // jest.mock('./database/database.js', () => ({
