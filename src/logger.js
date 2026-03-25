@@ -57,24 +57,41 @@ class Logger {
     return logData.replace(/\\"password\\":\s*\\"[^"]*\\"/g, '\\"password\\": \\"*****\\"');
   }
 
-sendLogToGrafana(event) {
-  if (process.env.NODE_ENV === 'test') {
-    return;
-  }
-    console.log("Sending log to Grafana:", JSON.stringify(event, null, 2));
+  sendLogToGrafana(event) {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
     const body = JSON.stringify(event);
     fetch(`${config.logging.endpointUrl}`, {
-        method: 'post',
-        body: body,
-        headers: {
+      method: 'post',
+      body,
+      headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${config.logging.accountId}:${config.logging.apiKey}`,
-        },
-    }).then((res) => {
-        if (!res.ok) console.log('Failed to send log to Grafana');
-    });
-    }
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const responseText = await res.text().catch(() => '<no response body>');
+          console.error('Failed to send log to Grafana', {
+            status: res.status,
+            statusText: res.statusText,
+            body: responseText,
+          });
+        } else {
+          console.log('Log sent to Grafana', { status: res.status });
+        }
+      })
+      .catch((err) => {
+        console.error('Grafana send error', {
+          message: err?.message,
+          stack: err?.stack,
+        });
+      });
+  }
 }
+
 module.exports = {
   logger: new Logger(),
   httpLogger: new Logger().httpLogger,
