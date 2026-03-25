@@ -35,9 +35,16 @@ class Logger {
   };
 
   log(level, type, logData) {
-    const labels = { component: config.logging.source, level: level, type: type };
-    const values = [this.nowString(), this.sanitize(logData)];
-    const logEvent = { streams: [{ stream: labels, values: [values] }] };
+    const labels = { component: config.logging.source, level, type };
+    const line = this.sanitize(logData); 
+    const logEvent = {
+      streams: [
+        {
+          stream: labels,
+          values: [[this.nowString(), line]],
+        },
+      ],
+    };
 
     this.sendLogToGrafana(logEvent);
   }
