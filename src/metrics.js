@@ -360,7 +360,7 @@ async function sendMetrics() {
     ],
   };
 
-  console.log("Sending payload:", JSON.stringify(payload, null, 2));
+  // console.log("Sending payload:", JSON.stringify(payload, null, 2));
   try {
     const response = await fetch(endpointUrl, {
       method: 'POST',
