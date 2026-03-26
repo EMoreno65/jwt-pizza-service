@@ -4,6 +4,7 @@ const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 const metrics = require('../metrics.js');
+const logger = require('../logger.js');
 
 const orderRouter = express.Router();
 
@@ -97,6 +98,15 @@ orderRouter.post(
       metrics.pizzaPurchase(false, latency, 0);
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
+    logger.log('info', 'order', {
+      authorized: !!req.headers.authorization,
+      path: req.originalUrl,
+      method: req.method,
+      statusCode: res.statusCode,
+      reqBody: JSON.stringify(req.body),
+      resBody: JSON.stringify({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt }),
+    });
+
   })
 );
 
