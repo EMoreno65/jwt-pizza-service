@@ -73,6 +73,7 @@ class Logger {
     }
     // if (process.env.DISABLE_LOGGING === 'true') return;
 
+    console.log('Sending log to Grafana', event);
     const body = JSON.stringify(event);
     fetch(`${config.logging.endpointUrl}`, {
       method: 'post',
