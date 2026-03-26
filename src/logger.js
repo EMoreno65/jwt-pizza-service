@@ -66,7 +66,13 @@ class Logger {
 
   sanitize(logData) {
     logData = JSON.stringify(logData);
-    return logData.replace(/\\"password\\":\s*\\"[^"]*\\"/g, '\\"password\\": \\"*****\\"');
+
+    const sensitiveFields = ['password', 'token', 'jwt', 'api_key'];
+    sensitiveFields.forEach((field) => {
+      const regex = new RegExp(`\\"${field}\\"\\s*:\\s*\\"[^"]*\\"`, 'g');
+      logData = logData.replace(regex, `\\"${field}\\": \\"*****\\"`);
+    });
+    return logData;
   }
 
   sendLogToGrafana(event) {
