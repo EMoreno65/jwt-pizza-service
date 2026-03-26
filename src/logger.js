@@ -16,6 +16,7 @@ const config = require('./config');
 
 class Logger {
   httpLogger = (req, res, next) => {
+    console.log('HTTP Request', { method: req.method, path: req.originalUrl });
     let send = res.send;
     res.send = (resBody) => {
       const logData = {
@@ -35,6 +36,7 @@ class Logger {
   };
 
   log(level, type, logData) {
+    console.log('Log Event', { level, type, ...logData });
     const labels = { component: config.logging.source, level, type };
     const line = this.sanitize(logData); 
     const logEvent = {
@@ -65,9 +67,10 @@ class Logger {
   }
 
   sendLogToGrafana(event) {
-    if (process.env.NODE_ENV === 'test') {
-      return;
-    }
+    // if (process.env.NODE_ENV === 'test') {
+    //   return;
+    // }
+    // if (process.env.DISABLE_LOGGING === 'true') return;
 
     const body = JSON.stringify(event);
     fetch(`${config.logging.endpointUrl}`, {
