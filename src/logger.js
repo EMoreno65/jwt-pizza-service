@@ -40,7 +40,7 @@ class Logger {
     console.log("Config is", config.logging);
     console.log("Config real is ", config);
     console.log('Log Event', { level, type, ...logData });
-    const labels = { component: config.logging?.source || 'jwt-pizza-service', level, type, method: logData.method, path: logData.path, statusCode: logData.statusCode, authorized: logData.authorized.toString(), reqBody: logData.reqBody, resBody: logData.resBody };
+    const labels = { component: config.logging?.source || 'jwt-pizza-service', level, type, method: logData.method, path: logData.path, statusCode: logData.statusCode, authorized: logData.authorized, reqBody: logData.reqBody, resBody: logData.resBody };
     const line = this.sanitize(logData); 
     const logEvent = {
       streams: [
