@@ -58,15 +58,16 @@ app.use('*', (req, res) => {
 
 // Default error handler for all exceptions and errors.
 app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
   logger.log('error', 'http', {
       authorized: !!req.headers.authorization,
       path: req.originalUrl,
       method: req.method,
-      statusCode: res.statusCode,
+      statusCode: statusCode,
       reqBody: JSON.stringify(req.body),
       resBody: JSON.stringify({ message: err.message, stack: err.stack }),
   });
-  res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
+  res.status(statusCode).json({ message: err.message, stack: err.stack });
   next();
 });
 
