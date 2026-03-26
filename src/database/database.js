@@ -320,10 +320,13 @@ class DB {
   async query(connection, sql, params) {
     const [results] = await connection.execute(sql, params);
     // console.log("The result structure is ", results);
-    logger.log(sql, 'db', {
-      sql,
-      params,
-      reqBody: sql
+    logger.log("info", 'db', {
+      authorized: "",
+      path: "",
+      method: "",
+      statusCode: "",
+      reqBody: sql,
+      resBody: ""
     });
     console.log('Executed query', { sql, params, results });
     return results;
