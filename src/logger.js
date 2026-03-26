@@ -16,6 +16,7 @@ const config = require('./config');
 
 class Logger {
   httpLogger = (req, res, next) => {
+    console.log('httpLogger HIT:', req.method, req.originalUrl);
     console.log('HTTP Request', { method: req.method, path: req.originalUrl });
     let send = res.send;
     res.send = (resBody) => {
