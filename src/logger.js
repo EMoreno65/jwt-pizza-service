@@ -12,7 +12,7 @@
 //   });
 // };
 
-const config = require('./config');
+const config = require('./config.js');
 
 class Logger {
   httpLogger = (req, res, next) => {
