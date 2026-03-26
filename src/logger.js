@@ -38,7 +38,7 @@ class Logger {
 
   log(level, type, logData) {
     console.log('Log Event', { level, type, ...logData });
-    const labels = { component: config.logging.source, level, type };
+    const labels = { component: config.logging?.source || 'jwt-pizza-service', level, type };
     const line = this.sanitize(logData); 
     const logEvent = {
       streams: [
@@ -75,12 +75,12 @@ class Logger {
 
     console.log('Sending log to Grafana', event);
     const body = JSON.stringify(event);
-    fetch(`${config.logging.endpointUrl}`, {
+    fetch(`${config.logging?.endpointUrl}`, {
       method: 'post',
       body,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.logging.accountId}:${config.logging.apiKey}`,
+        Authorization: `Bearer ${config.logging?.accountId}:${config.logging?.apiKey}`,
       },
     })
       .then(async (res) => {
