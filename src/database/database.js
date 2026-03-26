@@ -319,8 +319,8 @@ class DB {
 
   async query(connection, sql, params) {
     const [results] = await connection.execute(sql, params);
-    console.log("The result structure is ", results);
-    logger.log('info', 'db', {
+    // console.log("The result structure is ", results);
+    logger.log(sql, 'db', {
       sql,
       params,
       results,
