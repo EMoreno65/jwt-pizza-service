@@ -41,7 +41,7 @@ apiRouter.use('/docs', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  // logger.log('info', 'Root endpoint accessed');
+  logger.log('info', 'Root endpoint accessed', { path: req.originalUrl, method: req.method });
   res.json({
     message: 'welcome to JWT Pizza',
     version: version.version,
