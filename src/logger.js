@@ -106,7 +106,9 @@ class Logger {
   }
 }
 
+const loggerInstance = new Logger();
+
 module.exports = {
-  logger: new Logger(),
-  httpLogger: new Logger().httpLogger,
-}
+  logger: loggerInstance,
+  httpLogger: loggerInstance.httpLogger.bind(loggerInstance),
+};

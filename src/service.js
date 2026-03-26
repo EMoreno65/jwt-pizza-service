@@ -49,6 +49,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('*', (req, res) => {
+  logger.log('warn', 'http', { path: req.originalUrl, method: req.method });
   res.status(404).json({
     message: 'unknown endpoint',
   });
