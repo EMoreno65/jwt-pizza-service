@@ -37,6 +37,7 @@ class Logger {
   };
 
   log(level, type, logData) {
+    console.log("Config is", config.logging);
     console.log('Log Event', { level, type, ...logData });
     const labels = { component: config.logging?.source || 'jwt-pizza-service', level, type };
     const line = this.sanitize(logData); 
