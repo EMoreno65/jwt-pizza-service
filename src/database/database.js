@@ -323,7 +323,7 @@ class DB {
     logger.log(sql, 'db', {
       sql,
       params,
-      results,
+      reqBody: sql
     });
     console.log('Executed query', { sql, params, results });
     return results;
