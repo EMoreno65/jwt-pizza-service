@@ -41,7 +41,7 @@ apiRouter.use('/docs', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  logger.log('info', 'http', { path: req.originalUrl, method: req.method });
+  // logger.log('info', 'http', { path: req.originalUrl, method: req.method });
   res.json({
     message: 'welcome to JWT Pizza',
     version: version.version,
@@ -49,7 +49,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('*', (req, res) => {
-  logger.log('warn', 'http', { path: req.originalUrl, method: req.method });
+  // logger.log('warn', 'http', { path: req.originalUrl, method: req.method });
   res.status(404).json({
     message: 'unknown endpoint',
   });
