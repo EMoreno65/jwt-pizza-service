@@ -7,6 +7,7 @@ const version = require('./version.json');
 const config = require('./config.js');
 const metrics = require('./metrics.js');
 const { httpLogger } = require('./logger.js');
+const logger = require('./logger.js');
 
 const app = express();
 app.use(express.json());
@@ -57,6 +58,14 @@ app.use('*', (req, res) => {
 
 // Default error handler for all exceptions and errors.
 app.use((err, req, res, next) => {
+  logger.log('error', 'http', {
+      authorized: !!req.headers.authorization,
+      path: req.originalUrl,
+      method: req.method,
+      statusCode: res.statusCode,
+      reqBody: JSON.stringify(req.body),
+      resBody: JSON.stringify({ message: err.message, stack: err.stack }),
+  });
   res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
   next();
 });
