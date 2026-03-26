@@ -67,9 +67,9 @@ class Logger {
   }
 
   sendLogToGrafana(event) {
-    // if (process.env.NODE_ENV === 'test') {
-    //   return;
-    // }
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
     // if (process.env.DISABLE_LOGGING === 'true') return;
 
     const body = JSON.stringify(event);
