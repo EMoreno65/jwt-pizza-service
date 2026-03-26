@@ -6,11 +6,11 @@ const userRouter = require('./routes/userRouter.js');
 const version = require('./version.json');
 const config = require('./config.js');
 const metrics = require('./metrics.js');
-const logger = require('./logger.js');
+const { logger, httpLogger } = require('./logger.js');
 
 const app = express();
 app.use(express.json());
-app.use(logger.httpLogger);
+app.use(httpLogger);
 app.use(setAuthUser);
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -41,7 +41,7 @@ apiRouter.use('/docs', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  logger.log('info', 'Root endpoint accessed', { path: req.originalUrl, method: req.method });
+  logger.log('info', 'http', { path: req.originalUrl, method: req.method });
   res.json({
     message: 'welcome to JWT Pizza',
     version: version.version,
