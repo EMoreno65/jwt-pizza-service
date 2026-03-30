@@ -29,8 +29,8 @@ apiRouter.use('/user', userRouter);
 apiRouter.use('/order', orderRouter);
 apiRouter.use('/franchise', franchiseRouter);
 
-console.log("Configured logging endpoint:", config.logging?.endpointUrl);
-console.log("Configured logging accountId:", config.logging?.accountId);
+// console.log("Configured logging endpoint:", config.logging?.endpointUrl);
+// console.log("Configured logging accountId:", config.logging?.accountId);
 
 apiRouter.use('/docs', (req, res) => {
   res.json({

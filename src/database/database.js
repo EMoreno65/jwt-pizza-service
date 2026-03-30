@@ -57,11 +57,11 @@ class DB {
   }
 
   async listUsers() {
-    console.log("Made it to list users");
+    // console.log("Made it to list users");
     const connection = await this.getConnection();
     try {
       const users = await this.query(connection, `SELECT * FROM user`);
-      console.log("The users found in the database are: ", users);
+      // console.log("The users found in the database are: ", users);
       return users;
     } finally {
       connection.end();
@@ -217,7 +217,7 @@ class DB {
   }
 
   async deleteUser(userId) {
-    console.log('It is in the database', userId);
+    // console.log('It is in the database', userId);
     const connection = await this.getConnection();
     try {
       await this.query(connection, `DELETE FROM userRole WHERE userId=?`, [userId]);
@@ -328,7 +328,7 @@ class DB {
       reqBody: sql,
       resBody: ""
     });
-    console.log('Executed query', { sql, params, results });
+    // console.log('Executed query', { sql, params, results });
     return results;
   }
 

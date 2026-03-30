@@ -51,9 +51,9 @@ function sendMetricToGrafana(metricName, metricValue, type, unit) {
   }
 
   const body = JSON.stringify(metric);
-  console.log("body is ", body);
-  console.log(config.endpointUrl);
-  console.log({ Authorization: `Bearer ${config.accountId}:${config.apiKey}`, 'Content-Type': 'application/json' });
+  // console.log("body is ", body);
+  // console.log(config.endpointUrl);
+  // console.log({ Authorization: `Bearer ${config.accountId}:${config.apiKey}`, 'Content-Type': 'application/json' });
   fetch(`${config.endpointUrl}`, {
     method: 'POST',
     body: body,

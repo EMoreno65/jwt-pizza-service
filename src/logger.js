@@ -16,8 +16,8 @@ const config = require('./config.js');
 
 class Logger {
   httpLogger = (req, res, next) => {
-    console.log('httpLogger HIT:', req.method, req.originalUrl);
-    console.log('HTTP Request', { method: req.method, path: req.originalUrl });
+    // console.log('httpLogger HIT:', req.method, req.originalUrl);
+    // console.log('HTTP Request', { method: req.method, path: req.originalUrl });
     let send = res.send;
     res.send = (resBody) => {
       const logData = {
@@ -37,9 +37,9 @@ class Logger {
   };
 
   log(level, type, logData) {
-    console.log("Config is", config.logging);
-    console.log("Config real is ", config);
-    console.log('Log Event', { level, type, ...logData });
+    // console.log("Config is", config.logging);
+    // console.log("Config real is ", config);
+    // console.log('Log Event', { level, type, ...logData });
     const labels = { component: config.logging?.source || 'jwt-pizza-service', level, type, method: logData.method, path: logData.path, statusCode: logData.statusCode, authorized: logData.authorized, reqBody: logData.reqBody || level, resBody: logData.resBody };
     const line = this.sanitize(logData); 
     const logEvent = {
@@ -81,7 +81,7 @@ class Logger {
     }
     // if (process.env.DISABLE_LOGGING === 'true') return;
 
-    console.log('Sending log to Grafana', event);
+    // console.log('Sending log to Grafana', event);
     const body = JSON.stringify(event);
     fetch(`${config.logging?.endpointUrl}`, {
       method: 'post',
@@ -100,7 +100,7 @@ class Logger {
             body: responseText,
           });
         } else {
-          console.log('Log sent to Grafana', { status: res.status });
+          // console.log('Log sent to Grafana', { status: res.status });
         }
       })
       .catch((err) => {

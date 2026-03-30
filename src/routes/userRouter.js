@@ -90,13 +90,13 @@ userRouter.delete(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    console.log('Delete user endpoint hit, calls database next');
+    // console.log('Delete user endpoint hit, calls database next');
     const userId = req.params.userId;
     // console.log('The request is ', req.params);
-    console.log('User id to delete is ', userId);
+    // console.log('User id to delete is ', userId);
     const user = req.user;
-    console.log('Compared against: ', user.id);
-    console.log('User role is ', user.roles);
+    // console.log('Compared against: ', user.id);
+    // console.log('User role is ', user.roles);
     if (user.id !== userId && !user.isRole(Role.Admin)) {
       return res.status(403).json({ message: 'unauthorized' });
     }
