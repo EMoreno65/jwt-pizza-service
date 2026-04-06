@@ -13,6 +13,7 @@ const systemMetrics = { cpu: 0, memory: 0 };
 const purchaseMetrics = { total: 0, success: 0, failure: 0, revenue: 0, latency: 0 };
 const userMetrics = { total: 0, active: 0 };
 const authMetrics = { total: 0, success: 0, failure: 0 };
+const chaosMetrics = { enabled: 0, triggered: 0 };
 const ACTIVE_WINDOW_MS = 10 * 60 * 1000;
 const activeUsersLastSeen = new Map();
 const knownUsers = new Set();
@@ -72,6 +73,14 @@ function pizzaPurchase(success, latency, price) {
     purchaseMetrics.failure++;
   }
   purchaseMetrics.latency += latency;
+}
+
+function setChaosEnabled(enabled) {
+  chaosMetrics.enabled = enabled ? 1 : 0;
+}
+
+function chaosTriggered() {
+  chaosMetrics.triggered++;
 }
 
 function collectSystemMetrics() {
@@ -321,6 +330,34 @@ async function sendMetrics() {
       }
     },
     {
+      name: 'ethan_chaos_enabled',
+      unit: '1',
+      gauge: {
+        dataPoints: [
+          {
+            asInt: chaosMetrics.enabled,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ],
+      },
+    },
+    {
+      name: 'ethan_chaos_triggered_total',
+      unit: '1',
+      sum: {
+        aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+        isMonotonic: true,
+        dataPoints: [
+          {
+            asInt: chaosMetrics.triggered,
+            timeUnixNano: nowNs,
+            attributes: [{ key: 'source', value: { stringValue: source } }],
+          },
+        ]
+      }
+    },
+    {
       name: 'ethan_cpu_usage',
       unit: '1',
       gauge: {
@@ -390,5 +427,7 @@ if (process.env.NODE_ENV !== 'test') {
 module.exports = {
   requestTracker,
   pizzaPurchase,
-  authAttempt
+  authAttempt,
+  setChaosEnabled,
+  chaosTriggered,
 };
