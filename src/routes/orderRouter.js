@@ -42,27 +42,27 @@ orderRouter.docs = [
   },
 ];
 
-let enableChaos = false;
-orderRouter.put(
-  '/chaos/:state',
-  authRouter.authenticateToken,
-  asyncHandler(async (req, res) => {
-    if (req.user.isRole(Role.Admin)) {
-      enableChaos = req.params.state === 'true';
-      metrics.setChaosEnabled(enableChaos);
-    }
+// let enableChaos = false;
+// orderRouter.put(
+//   '/chaos/:state',
+//   authRouter.authenticateToken,
+//   asyncHandler(async (req, res) => {
+//     if (req.user.isRole(Role.Admin)) {
+//       enableChaos = req.params.state === 'true';
+//       metrics.setChaosEnabled(enableChaos);
+//     }
 
-    res.json({ chaos: enableChaos });
-  })
-);
+//     res.json({ chaos: enableChaos });
+//   })
+// );
 
-orderRouter.post('/', (req, res, next) => {
-  if (enableChaos && Math.random() < 0.5) {
-    metrics.chaosTriggered();
-    throw new StatusCodeError('Chaos monkey', 500);
-  }
-  next();
-});
+// orderRouter.post('/', (req, res, next) => {
+//   if (enableChaos && Math.random() < 0.5) {
+//     metrics.chaosTriggered();
+//     throw new StatusCodeError('Chaos monkey', 500);
+//   }
+//   next();
+// });
 
 // getMenu
 orderRouter.get(
