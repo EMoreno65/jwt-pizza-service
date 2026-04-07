@@ -94,6 +94,10 @@ function collectSystemMetrics() {
   systemMetrics.memory = Number(memory.toFixed(2));
 }
 
+function safeNumber(value) {
+  return Number.isFinite(value) ? value : 0;
+}
+
 function getActiveUsersCount() {
   const now = Date.now();
 
@@ -272,7 +276,7 @@ async function sendMetrics() {
       gauge: {
         dataPoints: [
           {
-            asDouble: pizzaLatency,
+            asDouble: safeNumber(pizzaLatency),
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
