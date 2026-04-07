@@ -85,13 +85,13 @@ function chaosTriggered() {
 
 function collectSystemMetrics() {
   const cpuUsage = os.loadavg()[0] / os.cpus().length;
-  systemMetrics.cpu = cpuUsage.toFixed(2) * 100;
 
+  systemMetrics.cpu = Number((cpuUsage * 100).toFixed(2));
   const totalMemory = os.totalmem();
   const freeMemory = os.freemem();
   const usedMemory = totalMemory - freeMemory;
   let memory = (usedMemory / totalMemory) * 100;
-  systemMetrics.memory = memory.toFixed(2);
+  systemMetrics.memory = Number(memory.toFixed(2));
 }
 
 function getActiveUsersCount() {
