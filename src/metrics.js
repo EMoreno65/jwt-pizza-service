@@ -122,9 +122,15 @@ async function sendMetrics() {
   }
 
   const activeUsersCount = getActiveUsersCount();
-  const averageLatency = httpMetrics.TOTAL.totalLatency / httpMetrics.TOTAL.count;
-  const pizzaLatency = purchaseMetrics.latency / purchaseMetrics.success;
+  const averageLatency =
+    httpMetrics.TOTAL.count > 0
+      ? httpMetrics.TOTAL.totalLatency / httpMetrics.TOTAL.count
+      : 0;
 
+  const pizzaLatency =
+    purchaseMetrics.success > 0
+      ? purchaseMetrics.latency / purchaseMetrics.success
+      : 0;
   const nowNs = Date.now() * 1000000;
   const metrics = [ 
     {
