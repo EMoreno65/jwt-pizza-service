@@ -104,13 +104,15 @@ orderRouter.post(
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
     const start = Date.now();
-    console.log("Route hit - starting order");
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
       body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
     });
+
+    // Everytime this fetch request is called basically, I make a counter, then divide?
     const latency = Date.now() - start;
+    // Should I change this by dividing it?? ^^^
     const j = await r.json();
     if (r.ok) {
       // console.log("It's in here, here's the order and json ", order, r);
