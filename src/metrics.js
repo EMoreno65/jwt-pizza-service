@@ -123,6 +123,7 @@ async function sendMetrics() {
 
   const activeUsersCount = getActiveUsersCount();
   const averageLatency = httpMetrics.TOTAL.totalLatency / httpMetrics.TOTAL.count;
+  const pizzaLatency = purchaseMetrics.success > 0 ? purchaseMetrics.latency / purchaseMetrics.success : 0;
 
   const nowNs = Date.now() * 1000000;
   const metrics = [ 
@@ -265,7 +266,7 @@ async function sendMetrics() {
       gauge: {
         dataPoints: [
           {
-            asDouble: purchaseMetrics.latency,
+            asDouble: pizzaLatency,
             timeUnixNano: nowNs,
             attributes: [{ key: 'source', value: { stringValue: source } }],
           },
