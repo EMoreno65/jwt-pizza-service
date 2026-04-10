@@ -8,6 +8,32 @@ const { logger } = require('../logger.js');
 
 const orderRouter = express.Router();
 
+function canonicalizeOrderRequest(orderReq, menu) {
+  if (!orderReq || !Array.isArray(orderReq.items) || orderReq.items.length === 0) {
+    throw new StatusCodeError('order must include at least one menu item', 400);
+  }
+
+  const menuById = new Map(menu.map((item) => [String(item.id), item]));
+  const items = orderReq.items.map((item) => {
+    const menuItem = menuById.get(String(item.menuId));
+    if (!menuItem) {
+      throw new StatusCodeError(`unknown menu item ${item.menuId}`, 400);
+    }
+
+    return {
+      menuId: menuItem.id,
+      description: menuItem.title,
+      price: menuItem.price,
+    };
+  });
+
+  return {
+    franchiseId: orderReq.franchiseId,
+    storeId: orderReq.storeId,
+    items,
+  };
+}
+
 orderRouter.docs = [
   {
     method: 'GET',
@@ -101,7 +127,7 @@ orderRouter.post(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    const orderReq = req.body;
+    const orderReq = canonicalizeOrderRequest(req.body, await DB.getMenu());
     const order = await DB.addDinerOrder(req.user, orderReq);
     const start = Date.now();
     const r = await fetch(`${config.factory.url}/api/order`, {
