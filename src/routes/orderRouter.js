@@ -154,7 +154,7 @@ orderRouter.post(
       method: req.method,
       statusCode: res.statusCode,
       reqBody: JSON.stringify(req.body),
-      resBody: JSON.stringify({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt }),
+      resBody: JSON.stringify({ order, followLinkToEndChaos: j.reportUrl }),
     });
 
   })
