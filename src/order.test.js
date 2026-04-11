@@ -136,7 +136,6 @@ test('Create Order', async () => {
           storeId: 3,
           items: [{ menuId: 1, description: 'Pepperoni', price: 0.0042 }],
         }),
-        jwt: 'j',
         followLinkToEndChaos: 'u',
       })
     );
