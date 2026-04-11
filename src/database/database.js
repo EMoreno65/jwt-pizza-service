@@ -143,6 +143,20 @@ class DB {
     }
   }
 
+  async validateStoreForFranchise(franchiseId, storeId) {
+    const connection = await this.getConnection();
+    try {
+      const rows = await this.query(
+        connection,
+        `SELECT id FROM store WHERE id=? AND franchiseId=?`,
+        [storeId, franchiseId]
+      );
+      return rows.length > 0;
+    } finally {
+      connection.end();
+    }
+  }
+
   async getOrders(user, page = 1) {
     const connection = await this.getConnection();
     try {

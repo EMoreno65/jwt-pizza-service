@@ -130,6 +130,11 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = canonicalizeOrderRequest(req.body, await DB.getMenu());
 
+    const storeValid = await DB.validateStoreForFranchise(orderReq.franchiseId, orderReq.storeId);
+    if (!storeValid) {
+      throw new StatusCodeError('invalid franchiseId or storeId', 400);
+    }
+
     const duplicateOrder = await DB.getRecentDuplicateOrder(req.user, orderReq, RAPID_DUPLICATE_WINDOW_SECONDS);
     if (duplicateOrder) {
       throw new StatusCodeError('duplicate order submitted too quickly. wait a few seconds before reordering.', 409);

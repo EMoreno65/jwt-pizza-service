@@ -25,6 +25,7 @@ jest.mock('./database/database.js', () => ({
     addUser: jest.fn(),
     getMenu: jest.fn(),
     getRecentDuplicateOrder: jest.fn(),
+    validateStoreForFranchise: jest.fn(),
     addMenuItem: jest.fn(),
     createFranchise: jest.fn(),
     createStore: jest.fn(),
@@ -59,6 +60,7 @@ beforeEach(async () => {
   }));
   DB.getMenu.mockResolvedValue([]);
   DB.getRecentDuplicateOrder.mockResolvedValue(null);
+  DB.validateStoreForFranchise.mockResolvedValue(true);
   mockUser = await createAdminUser();
 });
 
@@ -142,6 +144,24 @@ test('Create Order', async () => {
         jwt: 'j',
       })
     );
+});
+
+test('Create Order rejects tampered franchiseId or storeId', async () => {
+    DB.getMenu.mockResolvedValue([{ id: 1, title: 'Pepperoni', price: 0.0042, description: 'Spicy treat' }]);
+    DB.validateStoreForFranchise.mockResolvedValue(false);
+
+    mockUser = { id: 2, roles: [{ role: Role.Diner }] };
+    global.fetch = jest.fn();
+
+    const orderRes = await request(app)
+      .post('/api/order')
+      .set('Authorization', 'Bearer diner')
+      .send({ franchiseId: 99, storeId: 999, items: [{ menuId: 1 }] });
+
+    expect(orderRes.status).toBe(400);
+    expect(orderRes.body).toEqual(expect.objectContaining({ message: 'invalid franchiseId or storeId' }));
+    expect(DB.addDinerOrder).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
 });
 
 test('Create Order rejects rapid duplicate submissions only', async () => {
