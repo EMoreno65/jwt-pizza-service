@@ -158,16 +158,35 @@ class DB {
     }
   }
 
-  async addDinerOrder(user, order) {
+  async addDinerOrder(user, order, idempotencyKey) {
+    if (!idempotencyKey) {
+      throw new StatusCodeError('idempotency key is required', 400);
+    }
+
     const connection = await this.getConnection();
     try {
-      const orderResult = await this.query(connection, `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now())`, [user.id, order.franchiseId, order.storeId]);
-      const orderId = orderResult.insertId;
-      for (const item of order.items) {
-        const menuId = await this.getID(connection, 'id', item.menuId, 'menu');
-        await this.query(connection, `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`, [orderId, menuId, item.description, item.price]);
+      await connection.beginTransaction();
+      try {
+        await this.query(connection, `INSERT INTO dinerOrderRequest (dinerId, idempotencyKey, createdAt) VALUES (?, ?, now())`, [user.id, idempotencyKey]);
+
+        const orderResult = await this.query(connection, `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now())`, [user.id, order.franchiseId, order.storeId]);
+        const orderId = orderResult.insertId;
+
+        for (const item of order.items) {
+          const menuId = await this.getID(connection, 'id', item.menuId, 'menu');
+          await this.query(connection, `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`, [orderId, menuId, item.description, item.price]);
+        }
+
+        await this.query(connection, `UPDATE dinerOrderRequest SET orderId=? WHERE dinerId=? AND idempotencyKey=?`, [orderId, user.id, idempotencyKey]);
+        await connection.commit();
+        return { ...order, id: orderId };
+      } catch (err) {
+        await connection.rollback();
+        if (err && err.code === 'ER_DUP_ENTRY') {
+          throw new StatusCodeError('duplicate order submission', 409);
+        }
+        throw err;
       }
-      return { ...order, id: orderId };
     } finally {
       connection.end();
     }
