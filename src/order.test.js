@@ -137,6 +137,7 @@ test('Create Order', async () => {
           items: [{ menuId: 1, description: 'Pepperoni', price: 0.0042 }],
         }),
         followLinkToEndChaos: 'u',
+        jwt: 'j',
       })
     );
 });
