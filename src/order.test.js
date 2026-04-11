@@ -126,8 +126,7 @@ test('Create Order', async () => {
         franchiseId: 7,
         storeId: 3,
         items: [{ menuId: 1, description: 'Pepperoni', price: 0.0042 }],
-      },
-      expect.any(String)
+      }
     );
     expect(orderRes.body).toEqual(
       expect.objectContaining({
@@ -140,28 +139,6 @@ test('Create Order', async () => {
         followLinkToEndChaos: 'u',
       })
     );
-});
-
-test('Create Order duplicate request is rejected', async () => {
-    DB.getMenu.mockResolvedValue([{ id: 1, title: 'Pepperoni', price: 0.0042, description: 'Spicy treat' }]);
-    DB.addDinerOrder.mockImplementation(async () => {
-      const err = new Error('duplicate order submission');
-      err.statusCode = 409;
-      throw err;
-    });
-
-    mockUser = { id: 2, roles: [{ role: Role.Diner }] };
-    global.fetch = jest.fn();
-
-    const orderRes = await request(app)
-      .post('/api/order')
-      .set('Authorization', 'Bearer diner')
-      .set('Idempotency-Key', 'repeat-123')
-      .send({ franchiseId: 7, storeId: 3, items: [{ menuId: 1 }] });
-
-    expect(orderRes.status).toBe(409);
-    expect(orderRes.body).toEqual(expect.objectContaining({ message: 'duplicate order submission' }));
-    expect(global.fetch).not.toHaveBeenCalled();
 });
 
 

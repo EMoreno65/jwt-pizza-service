@@ -60,17 +60,6 @@ const tableCreateStatements = [
     FOREIGN KEY (orderId) REFERENCES dinerOrder(id),
     INDEX (menuId)
   )`,
-
-  `CREATE TABLE IF NOT EXISTS dinerOrderRequest (
-    dinerId INT NOT NULL,
-    idempotencyKey VARCHAR(128) NOT NULL,
-    orderId INT,
-    createdAt DATETIME NOT NULL,
-    PRIMARY KEY (dinerId, idempotencyKey),
-    INDEX (orderId),
-    FOREIGN KEY (dinerId) REFERENCES user(id),
-    FOREIGN KEY (orderId) REFERENCES dinerOrder(id)
-  )`,
 ];
 
 module.exports = { tableCreateStatements };

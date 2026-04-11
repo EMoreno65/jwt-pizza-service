@@ -1,5 +1,4 @@
 const express = require('express');
-const crypto = require('crypto');
 const config = require('../config.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
@@ -35,33 +34,6 @@ function canonicalizeOrderRequest(orderReq, menu) {
   };
 }
 
-function buildOrderIdempotencyKey(req, orderReq) {
-  const providedKey = req.get('Idempotency-Key') || req.get('X-Idempotency-Key');
-  if (typeof providedKey === 'string' && providedKey.trim().length > 0) {
-    return providedKey.trim().slice(0, 128);
-  }
-
-  const normalizedItems = [...orderReq.items]
-    .map((item) => ({ menuId: item.menuId, description: item.description, price: item.price }))
-    .sort((a, b) => {
-      if (a.menuId !== b.menuId) {
-        return a.menuId - b.menuId;
-      }
-      if (a.description !== b.description) {
-        return a.description.localeCompare(b.description);
-      }
-      return a.price - b.price;
-    });
-
-  const payload = JSON.stringify({
-    dinerId: req.user.id,
-    franchiseId: orderReq.franchiseId,
-    storeId: orderReq.storeId,
-    items: normalizedItems,
-  });
-  return `body-${crypto.createHash('sha256').update(payload).digest('hex')}`;
-}
-
 orderRouter.docs = [
   {
     method: 'GET',
@@ -90,8 +62,8 @@ orderRouter.docs = [
     method: 'POST',
     path: '/api/order',
     requiresAuth: true,
-    description: 'Create a order for the authenticated user. Duplicate submissions are blocked with idempotency protection.',
-    example: `curl -X POST localhost:3000/api/order -H 'Content-Type: application/json' -H 'Idempotency-Key: checkout-12345' -d '{"franchiseId": 1, "storeId":1, "items":[{ "menuId": 1, "description": "Veggie", "price": 0.05 }]}'  -H 'Authorization: Bearer tttttt'`,
+    description: 'Create a order for the authenticated user',
+    example: `curl -X POST localhost:3000/api/order -H 'Content-Type: application/json' -d '{"franchiseId": 1, "storeId":1, "items":[{ "menuId": 1, "description": "Veggie", "price": 0.05 }]}'  -H 'Authorization: Bearer tttttt'`,
     response: { order: { franchiseId: 1, storeId: 1, items: [{ menuId: 1, description: 'Veggie', price: 0.05 }], id: 1 }, jwt: '1111111111' },
   },
 ];
@@ -156,8 +128,7 @@ orderRouter.post(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     const orderReq = canonicalizeOrderRequest(req.body, await DB.getMenu());
-    const idempotencyKey = buildOrderIdempotencyKey(req, orderReq);
-    const order = await DB.addDinerOrder(req.user, orderReq, idempotencyKey);
+    const order = await DB.addDinerOrder(req.user, orderReq);
     const start = Date.now();
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: 'POST',
