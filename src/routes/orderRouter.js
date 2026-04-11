@@ -7,6 +7,7 @@ const metrics = require('../metrics.js');
 const { logger } = require('../logger.js');
 
 const orderRouter = express.Router();
+const RAPID_DUPLICATE_WINDOW_SECONDS = 20;
 
 function canonicalizeOrderRequest(orderReq, menu) {
   if (!orderReq || !Array.isArray(orderReq.items) || orderReq.items.length === 0) {
@@ -128,6 +129,12 @@ orderRouter.post(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     const orderReq = canonicalizeOrderRequest(req.body, await DB.getMenu());
+
+    const duplicateOrder = await DB.getRecentDuplicateOrder(req.user, orderReq, RAPID_DUPLICATE_WINDOW_SECONDS);
+    if (duplicateOrder) {
+      throw new StatusCodeError('duplicate order submitted too quickly. wait a few seconds before reordering.', 409);
+    }
+
     const order = await DB.addDinerOrder(req.user, orderReq);
     const start = Date.now();
     const r = await fetch(`${config.factory.url}/api/order`, {

@@ -158,6 +158,71 @@ class DB {
     }
   }
 
+  normalizeOrderItems(items = []) {
+    return items
+      .map((item) => ({
+        menuId: Number(item.menuId),
+        description: item.description,
+        price: Number(item.price),
+      }))
+      .sort((a, b) => {
+        if (a.menuId !== b.menuId) {
+          return a.menuId - b.menuId;
+        }
+        if (a.description !== b.description) {
+          return a.description.localeCompare(b.description);
+        }
+        return a.price - b.price;
+      });
+  }
+
+  areOrderItemsEqual(itemsA = [], itemsB = []) {
+    if (itemsA.length !== itemsB.length) {
+      return false;
+    }
+
+    for (let i = 0; i < itemsA.length; i++) {
+      if (itemsA[i].menuId !== itemsB[i].menuId || itemsA[i].description !== itemsB[i].description || itemsA[i].price !== itemsB[i].price) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  async getRecentDuplicateOrder(user, order, dedupeWindowSeconds = 20) {
+    const connection = await this.getConnection();
+    try {
+      const recentOrders = await this.query(
+        connection,
+        `SELECT id, dinerId, franchiseId, storeId, date
+         FROM dinerOrder
+         WHERE dinerId=? AND franchiseId=? AND storeId=?
+           AND date >= DATE_SUB(now(), INTERVAL ? SECOND)
+         ORDER BY id DESC
+         LIMIT 20`,
+        [user.id, order.franchiseId, order.storeId, dedupeWindowSeconds]
+      );
+
+      const normalizedNewItems = this.normalizeOrderItems(order.items);
+      for (const recentOrder of recentOrders) {
+        const recentItems = await this.query(
+          connection,
+          `SELECT menuId, description, price FROM orderItem WHERE orderId=?`,
+          [recentOrder.id]
+        );
+
+        if (this.areOrderItemsEqual(this.normalizeOrderItems(recentItems), normalizedNewItems)) {
+          return { ...recentOrder, items: recentItems };
+        }
+      }
+
+      return null;
+    } finally {
+      connection.end();
+    }
+  }
+
   async addDinerOrder(user, order) {
     const connection = await this.getConnection();
     try {

@@ -24,6 +24,7 @@ jest.mock('./database/database.js', () => ({
   DB: {
     addUser: jest.fn(),
     getMenu: jest.fn(),
+    getRecentDuplicateOrder: jest.fn(),
     addMenuItem: jest.fn(),
     createFranchise: jest.fn(),
     createStore: jest.fn(),
@@ -57,6 +58,7 @@ beforeEach(async () => {
     ...user,
   }));
   DB.getMenu.mockResolvedValue([]);
+  DB.getRecentDuplicateOrder.mockResolvedValue(null);
   mockUser = await createAdminUser();
 });
 
@@ -140,6 +142,24 @@ test('Create Order', async () => {
         jwt: 'j',
       })
     );
+});
+
+test('Create Order rejects rapid duplicate submissions only', async () => {
+    DB.getMenu.mockResolvedValue([{ id: 1, title: 'Pepperoni', price: 0.0042, description: 'Spicy treat' }]);
+    DB.getRecentDuplicateOrder.mockResolvedValue({ id: 99 });
+
+    mockUser = { id: 2, roles: [{ role: Role.Diner }] };
+    global.fetch = jest.fn();
+
+    const orderRes = await request(app)
+      .post('/api/order')
+      .set('Authorization', 'Bearer diner')
+      .send({ franchiseId: 7, storeId: 3, items: [{ menuId: 1 }] });
+
+    expect(orderRes.status).toBe(409);
+    expect(orderRes.body).toEqual(expect.objectContaining({ message: 'duplicate order submitted too quickly. wait a few seconds before reordering.' }));
+    expect(DB.addDinerOrder).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
 });
 
 
