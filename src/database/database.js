@@ -457,16 +457,44 @@ class DB {
           await connection.query(statement);
         }
 
-        const [defaultAdminRows] = await connection.execute(`SELECT id FROM user WHERE email = ?`, ['a@jwt.com']);
-        if (defaultAdminRows.length === 0) {
-          const defaultAdmin = { name: '常用名字', email: 'a@jwt.com', password: 'admin', roles: [{ role: Role.Admin }] };
-          await this.addUser(defaultAdmin);
-        }
+        await this.ensureDefaultAdmin(connection);
       } finally {
         connection.end();
       }
     } catch (err) {
       console.error(JSON.stringify({ message: 'Error initializing database', exception: err.message, connection: config.db.connection }));
+    }
+  }
+
+  async ensureDefaultAdmin(connection) {
+    const [adminRows] = await connection.execute(`SELECT id, password FROM user WHERE email = ?`, ['a@jwt.com']);
+
+    if (adminRows.length === 0) {
+      const hashedPassword = await bcrypt.hash('admin', 10);
+      const [insertResult] = await connection.execute(`INSERT INTO user (name, email, password) VALUES (?, ?, ?)`, ['常用名字', 'a@jwt.com', hashedPassword]);
+      await connection.execute(`INSERT INTO userRole (userId, role, objectId) VALUES (?, ?, ?)`, [insertResult.insertId, Role.Admin, 0]);
+      console.log('Seeded default admin user');
+      return;
+    }
+
+    const adminUser = adminRows[0];
+    let passwordMatches = false;
+    try {
+      passwordMatches = await bcrypt.compare('admin', adminUser.password || '');
+    } catch {
+      passwordMatches = false;
+    }
+
+    if (!passwordMatches) {
+      const hashedPassword = await bcrypt.hash('admin', 10);
+      await connection.execute(`UPDATE user SET password=? WHERE id=?`, [hashedPassword, adminUser.id]);
+      console.log('Reset default admin password hash');
+    }
+
+    const [roleRows] = await connection.execute(`SELECT id FROM userRole WHERE userId=? AND role=?`, [adminUser.id, Role.Admin]);
+    if (roleRows.length === 0) {
+      await connection.execute(`INSERT INTO userRole (userId, role, objectId) VALUES (?, ?, ?)`, [adminUser.id, Role.Admin, 0]);
+      console.log('Restored default admin role');
     }
   }
 
