@@ -92,19 +92,23 @@ class DB {
     const connection = await this.getConnection();
     try {
       const params = [];
+      const values = [];
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 10);
         params.push(`password='${hashedPassword}'`);
+        values.push(hashedPassword);
       }
       if (email) {
         params.push(`email='${email}'`);
+        values.push(email);
       }
       if (name) {
         params.push(`name='${name}'`);
+        values.push(name);
       }
       if (params.length > 0) {
-        const query = `UPDATE user SET ${params.join(', ')} WHERE id=${userId}`;
-        await this.query(connection, query);
+        const query = `UPDATE user SET ${params.join(', ')} WHERE id=?`;
+        await this.query(connection, query, [...values, userId]);
       }
       return this.getUser(email, password);
     } finally {
